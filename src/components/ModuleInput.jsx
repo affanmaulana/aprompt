@@ -13,18 +13,18 @@ export default function ModuleInput({
     const selectedIds = Array.isArray(selectedValue) ? selectedValue : [];
     return (
       <div className="py-4">
-        <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-zinc-400 block mb-2.5">
+        <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-zinc-400 block mb-3">
           <span className="text-zinc-500 font-extrabold">{formattedIndex}</span>
           {item.title}
         </span>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           {item.options?.map((option) => {
             const isSelected = selectedIds.includes(option.id);
             return (
               <button
                 key={option.id}
                 onClick={() => onChange(item.id, option.id)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-sans font-medium transition-all duration-150 cursor-pointer border ${
+                className={`px-5 py-2.5 rounded-full text-sm font-sans font-medium transition-all duration-150 cursor-pointer border ${
                   isSelected
                     ? "bg-zinc-950 text-white border-zinc-950 shadow-sm"
                     : "bg-white text-zinc-500 border-zinc-200 hover:border-zinc-450 hover:text-zinc-800"
@@ -49,18 +49,18 @@ export default function ModuleInput({
   // 2. Render Standard Single-Select (with allowDetailInput support)
   return (
     <div className="py-4">
-      <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-zinc-400 block mb-2.5">
+      <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-zinc-400 block mb-3">
         <span className="text-zinc-500 font-extrabold">{formattedIndex}</span>
         {item.title}
       </span>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-3">
         {item.options?.map((option) => {
           const isSelected = selectedValue === option.id;
           return (
             <button
               key={option.id}
               onClick={() => onChange(item.id, option.id)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-sans font-medium transition-all duration-150 cursor-pointer border ${
+              className={`px-5 py-2.5 rounded-full text-sm font-sans font-medium transition-all duration-150 cursor-pointer border ${
                 isSelected
                   ? "bg-zinc-950 text-white border-zinc-950 shadow-sm"
                   : "bg-white text-zinc-500 border-zinc-200 hover:border-zinc-450 hover:text-zinc-800"

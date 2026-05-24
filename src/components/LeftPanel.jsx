@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
-import { RotateCcw, Sparkles, Building2, Camera, Sun, Users } from "lucide-react";
+import { RotateCcw, Sparkles, Camera, Sun, Users } from "lucide-react";
 import { carriageGroups } from "../data/schema";
 import ModuleInput from "./ModuleInput";
 
 const iconMap = {
   Sparkles: Sparkles,
-  Building2: Building2,
   Camera: Camera,
   Sun: Sun,
   Users: Users
@@ -18,12 +17,6 @@ const themeMap = {
     border: "border-[#EAE6DF]",
     textAccent: "text-[#7A6A53]",
     bulletColor: "bg-[#7A6A53]"
-  },
-  project: {
-    bg: "bg-[#F5F7F5]", // sage
-    border: "border-[#E4EAE4]",
-    textAccent: "text-[#4A5D4A]",
-    bulletColor: "bg-[#4A5D4A]"
   },
   camera: {
     bg: "bg-[#F3F5F8]", // slate ice

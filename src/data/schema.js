@@ -384,10 +384,9 @@ export const promptSchema = [
 
 export const carriageGroups = [
   { id: 'essentials', title: 'Essentials', icon: 'Sparkles', order: 1 },
-  { id: 'project', title: 'Architecture', icon: 'Building2', order: 2 },
-  { id: 'camera', title: 'Camera & Framing', icon: 'Camera', order: 3 },
-  { id: 'environment', title: 'Environment', icon: 'Sun', order: 4 },
-  { id: 'narrative', title: 'Narrative & Context', icon: 'Users', order: 5 },
+  { id: 'camera', title: 'Camera & Framing', icon: 'Camera', order: 2 },
+  { id: 'environment', title: 'Environment', icon: 'Sun', order: 3 },
+  { id: 'narrative', title: 'Narrative & Context', icon: 'Users', order: 4 },
 ];
 
 // ============================================================================
