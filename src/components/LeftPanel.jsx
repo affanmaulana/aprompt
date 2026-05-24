@@ -11,6 +11,40 @@ const iconMap = {
   Users: Users
 };
 
+// sophisticated HSL off-white color mapping for sections
+const themeMap = {
+  essentials: {
+    bg: "bg-[#FAF9F6]", // linen
+    border: "border-[#EAE6DF]",
+    textAccent: "text-[#7A6A53]",
+    bulletColor: "bg-[#7A6A53]"
+  },
+  project: {
+    bg: "bg-[#F5F7F5]", // sage
+    border: "border-[#E4EAE4]",
+    textAccent: "text-[#4A5D4A]",
+    bulletColor: "bg-[#4A5D4A]"
+  },
+  camera: {
+    bg: "bg-[#F3F5F8]", // slate ice
+    border: "border-[#E2E6EC]",
+    textAccent: "text-[#3D5266]",
+    bulletColor: "bg-[#3D5266]"
+  },
+  environment: {
+    bg: "bg-[#FCF9F3]", // golden hour
+    border: "border-[#EFE7D8]",
+    textAccent: "text-[#8E7146]",
+    bulletColor: "bg-[#8E7146]"
+  },
+  narrative: {
+    bg: "bg-[#F6F5FA]", // lavender mauve
+    border: "border-[#EAE7F2]",
+    textAccent: "text-[#58496D]",
+    bulletColor: "bg-[#58496D]"
+  }
+};
+
 export default function LeftPanel({
   schema,
   selections,
@@ -84,24 +118,29 @@ export default function LeftPanel({
             </div>
 
             {/* Sidebar Anchor Links */}
-            <nav className="flex flex-col gap-6">
+            <nav className="flex flex-col gap-6 pl-2 relative">
               {carriageGroups
                 .sort((a, b) => a.order - b.order)
                 .map((group) => {
                   const isActive = activeSection === group.id;
+                  const theme = themeMap[group.id] || themeMap.essentials;
                   const GroupIcon = iconMap[group.icon] || Sparkles;
                   return (
                     <button
                       key={group.id}
                       onClick={() => handleScrollToSection(group.id)}
-                      className={`flex items-center gap-2.5 text-left transition-all duration-200 group/nav cursor-pointer ${
+                      className={`flex items-center gap-2.5 text-left transition-all duration-200 group/nav relative cursor-pointer ${
                         isActive
-                          ? "text-zinc-950 font-bold translate-x-1"
+                          ? "text-zinc-950 font-bold translate-x-1.5"
                           : "text-zinc-400 hover:text-zinc-700 font-medium"
                       }`}
                     >
+                      {/* Active Indicator Bullet mapped to HSL group theme */}
+                      {isActive && (
+                        <span className={`absolute -left-3.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full ${theme.bulletColor} animate-pulse`} />
+                      )}
                       <GroupIcon className={`w-3.5 h-3.5 transition-all ${
-                        isActive ? "text-zinc-950" : "text-zinc-350 group-hover/nav:text-zinc-550"
+                        isActive ? theme.textAccent : "text-zinc-350 group-hover/nav:text-zinc-550"
                       }`} />
                       <span className="text-xs font-sans tracking-wide">
                         {group.title}
@@ -125,11 +164,11 @@ export default function LeftPanel({
         </div>
 
         {/* ==================================================================
-            RIGHT COLUMN: 70% Scrollable Content Area
+            RIGHT COLUMN: 70% Scrollable Content Area (HSL group backdrops)
             ================================================================== */}
         <div
           id="specifications-scroll-container"
-          className="w-[68%] h-full overflow-y-auto px-8 py-8 flex flex-col scroll-smooth bg-white"
+          className="w-[68%] h-full overflow-y-auto px-6 py-8 flex flex-col scroll-smooth bg-white"
         >
           {carriageGroups
             .sort((a, b) => a.order - b.order)
@@ -137,34 +176,43 @@ export default function LeftPanel({
               const groupCarriages = schema.filter((c) => c.group === group.id);
               if (groupCarriages.length === 0) return null;
 
+              const theme = themeMap[group.id] || themeMap.essentials;
+
               return (
                 <div
                   key={group.id}
                   id={`section-${group.id}`}
-                  className="mb-10 last:mb-0 pt-4 first:pt-0 border-t border-zinc-100 first:border-t-0"
+                  className={`mb-8 p-6 rounded-2xl border ${theme.bg} ${theme.border} transition-all duration-300 shadow-[0_1px_3px_rgba(0,0,0,0.015)]`}
                 >
                   {/* Elegant Section Title */}
-                  <div className="mb-4">
-                    <h2 className="text-sm font-display font-extrabold text-zinc-950 tracking-wide">
+                  <div className="mb-4 flex items-center justify-between border-b border-zinc-200/50 pb-2">
+                    <h2 className={`text-xs font-display font-extrabold ${theme.textAccent} tracking-widest uppercase`}>
                       {group.title}
                     </h2>
-                    <span className="h-0.5 w-6 bg-zinc-950 block mt-1.5" />
+                    <span className="text-[9px] font-sans font-bold text-zinc-400 bg-white/60 py-0.5 px-2 rounded-full border border-zinc-150">
+                      {groupCarriages.length} params
+                    </span>
                   </div>
 
                   {/* Render modules within group */}
                   <div className="flex flex-col">
                     {groupCarriages
                       .sort((a, b) => a.order - b.order)
-                      .map((item) => (
-                        <ModuleInput
-                          key={item.id}
-                          item={item}
-                          selectedValue={selections[item.id]}
-                          customText={customTexts[item.id]}
-                          onChange={onSelectionChange}
-                          onCustomTextChange={onCustomTextChange}
-                        />
-                      ))}
+                      .map((item) => {
+                        // Calculate global sequential index for clean numerical indexing
+                        const globalIndex = schema.findIndex(s => s.id === item.id) + 1;
+                        return (
+                          <ModuleInput
+                            key={item.id}
+                            item={item}
+                            selectedValue={selections[item.id]}
+                            customText={customTexts[item.id]}
+                            onChange={onSelectionChange}
+                            onCustomTextChange={onCustomTextChange}
+                            index={globalIndex}
+                          />
+                        );
+                      })}
                   </div>
                 </div>
               );

@@ -18,6 +18,7 @@ export const promptSchema = [
     enabled: true,
     expandable: true,
     semanticPart: 'subject',
+    allowDetailInput: true,
     options: [
       { id: 'residential_house', label: 'Residential House', value: 'Residential House' },
       { id: 'luxury_villa', label: 'Luxury Villa', value: 'Luxury Villa' },
@@ -29,7 +30,6 @@ export const promptSchema = [
       { id: 'hospital', label: 'Hospital', value: 'Hospital' },
       { id: 'mixed_use_complex', label: 'Mixed-Use Complex', value: 'Mixed-Use Complex' },
       { id: 'school', label: 'School', value: 'School' },
-      { id: 'custom', label: 'Custom Input...', value: 'custom' },
     ],
   },
   {
@@ -43,6 +43,7 @@ export const promptSchema = [
     enabled: true,
     expandable: true,
     semanticPart: 'subject',
+    allowDetailInput: true,
     options: [
       { id: 'minimalist', label: 'Minimalist', value: 'Minimalist' },
       { id: 'modern_tropical', label: 'Modern Tropical', value: 'Modern Tropical' },
@@ -54,7 +55,6 @@ export const promptSchema = [
       { id: 'scandinavian', label: 'Scandinavian', value: 'Scandinavian' },
       { id: 'japandi', label: 'Japandi', value: 'Japandi' },
       { id: 'neo_futurism', label: 'Neo Futurism', value: 'Neo Futurism' },
-      { id: 'custom', label: 'Custom Input...', value: 'custom' },
     ],
   },
 
@@ -73,7 +73,7 @@ export const promptSchema = [
     expandable: true,
     semanticPart: 'geometry',
     type: 'toggle',
-    options: [], // Toggle is boolean, no options needed
+    options: [],
   },
   {
     id: 'material',
@@ -113,6 +113,7 @@ export const promptSchema = [
     enabled: true,
     expandable: true,
     semanticPart: 'camera',
+    allowDetailInput: true,
     options: [
       { id: 'eye_level', label: 'Eye Level', value: 'Eye Level' },
       { id: 'low_angle', label: 'Low Angle', value: 'Low Angle' },
@@ -120,7 +121,6 @@ export const promptSchema = [
       { id: 'bird_eye_view', label: 'Bird Eye View', value: 'Bird Eye View' },
       { id: 'drone_perspective', label: 'Drone Perspective', value: 'Drone Perspective' },
       { id: 'street_perspective', label: 'Street Perspective', value: 'Street Perspective' },
-      { id: 'custom', label: 'Custom Input...', value: 'custom' },
     ],
   },
   {
@@ -159,6 +159,7 @@ export const promptSchema = [
     enabled: true,
     expandable: true,
     semanticPart: 'lighting',
+    allowDetailInput: true,
     options: [
       { id: 'golden_hour', label: 'Golden Hour', value: 'Golden Hour' },
       { id: 'blue_hour', label: 'Blue Hour', value: 'Blue Hour' },
@@ -170,7 +171,6 @@ export const promptSchema = [
       { id: 'cloudy_day_diffusion', label: 'Cloudy Day Diffusion', value: 'Cloudy Day Diffusion' },
       { id: 'storm_light', label: 'Storm Light', value: 'Storm Light' },
       { id: 'volumetric_god_rays', label: 'Volumetric God Rays', value: 'Volumetric God Rays' },
-      { id: 'custom', label: 'Custom Input...', value: 'custom' },
     ],
   },
   {
@@ -184,6 +184,7 @@ export const promptSchema = [
     enabled: true,
     expandable: true,
     semanticPart: 'atmosphere',
+    allowDetailInput: true,
     options: [
       { id: 'sunny_clear_sky', label: 'Sunny Clear Sky', value: 'Sunny Clear Sky' },
       { id: 'partly_cloudy', label: 'Partly Cloudy', value: 'Partly Cloudy' },
@@ -195,7 +196,6 @@ export const promptSchema = [
       { id: 'dry_arid_climate', label: 'Dry Arid Climate', value: 'Dry Arid Climate' },
       { id: 'dust_storm', label: 'Dust Storm', value: 'Dust Storm' },
       { id: 'light_snowfall', label: 'Light Snowfall', value: 'Light Snowfall' },
-      { id: 'custom', label: 'Custom Input...', value: 'custom' },
     ],
   },
   {
@@ -257,6 +257,7 @@ export const promptSchema = [
     enabled: true,
     expandable: true,
     semanticPart: 'context',
+    allowDetailInput: true,
     options: [
       { id: 'minimal_landscape', label: 'Minimal Landscape', value: 'Minimal Landscape' },
       { id: 'lush_tropical_garden', label: 'Lush Tropical Garden', value: 'Lush Tropical Garden' },
@@ -264,7 +265,6 @@ export const promptSchema = [
       { id: 'urban_streetscape', label: 'Urban Streetscape', value: 'Urban Streetscape' },
       { id: 'pocket_garden', label: 'Pocket Garden', value: 'Pocket Garden' },
       { id: 'water_feature_landscape', label: 'Water Feature Landscape', value: 'Water Feature Landscape' },
-      { id: 'custom', label: 'Custom Input...', value: 'custom' },
     ],
   },
   {
@@ -323,12 +323,12 @@ export const promptSchema = [
     enabled: true,
     expandable: true,
     semanticPart: 'narrative',
+    allowDetailInput: true,
     options: [
       { id: 'no_humans', label: 'No Humans', value: 'No Humans' },
       { id: 'few_scattered_figures', label: 'Few Scattered Figures', value: 'Few Scattered Figures' },
       { id: 'moderate_crowd', label: 'Moderate Crowd', value: 'Moderate Crowd' },
       { id: 'busy_urban_crowd', label: 'Busy Urban Crowd', value: 'Busy Urban Crowd' },
-      { id: 'custom', label: 'Custom Input...', value: 'custom' },
     ],
   },
   {

@@ -53,7 +53,12 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
   // 2. PROCESS USER-CONFIGURED SPECIFICATIONS
   schema.forEach((item) => {
     const selection = selections?.[item.id];
-    if (selection === undefined || selection === null) return;
+    const customText = customTexts?.[item.id] || '';
+
+    // If both selections and custom text are empty, skip entirely
+    const hasSelection = selection !== undefined && selection !== null && selection !== '';
+    const hasCustomText = customText.trim().length > 0;
+    if (!hasSelection && !hasCustomText) return;
 
     // Special Case A: Geometry Toggle
     if (item.id === 'geometry') {
@@ -80,7 +85,6 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
       });
 
       // Add custom manual input if present
-      const customText = customTexts?.[item.id] || '';
       const cleanCustom = sanitizeValue(customText);
       if (cleanCustom) {
         materialParts.push(cleanCustom);
@@ -96,16 +100,26 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
       return;
     }
 
-    // Standard Single-select Inputs
+    // Standard single-select Inputs with custom details allowed
     let valueToInject = '';
 
-    if (selection === 'custom') {
-      const rawText = customTexts?.[item.id] || '';
-      valueToInject = sanitizeValue(rawText);
-    } else if (typeof selection === 'string') {
+    if (item.allowDetailInput) {
       const option = item.options?.find(opt => opt.id === selection);
-      if (option) {
-        valueToInject = sanitizeValue(option.value);
+      const selectedOptionVal = option ? sanitizeValue(option.value) : '';
+      const cleanCustomText = sanitizeValue(customText);
+
+      // Join option value and custom text cleanly
+      const parts = [selectedOptionVal, cleanCustomText].filter(Boolean);
+      valueToInject = parts.join(', ');
+    } else {
+      // Classic Custom Option Pill fallback or standard single select
+      if (selection === 'custom') {
+        valueToInject = sanitizeValue(customText);
+      } else if (typeof selection === 'string') {
+        const option = item.options?.find(opt => opt.id === selection);
+        if (option) {
+          valueToInject = sanitizeValue(option.value);
+        }
       }
     }
 
@@ -163,7 +177,6 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
 
     // Also include implicit values that don't map directly to schema keys but are in resolvedValues (e.g. role, task, output)
     sentenceDef.parts.forEach(part => {
-      // Find entries in resolvedValues that are implicit and belong to this semantic part
       Object.keys(resolvedValues).forEach(key => {
         const isImplicit = !schema.some(s => s.id === key);
         if (isImplicit && resolvedValues[key].semanticPart === part) {
