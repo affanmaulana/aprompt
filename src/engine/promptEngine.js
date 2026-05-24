@@ -1,6 +1,6 @@
 // ============================================================================
-// Aprompt — Semantic Prompt Assembly Engine
-// Zero-latency Client-side Compiler
+// Aprompt — Semantic Prompt Assembly Engine (v2)
+// Zero-latency CGI briefing Compiler with Implicit Foundation
 // ============================================================================
 
 /**
@@ -15,66 +15,165 @@ export function sanitizeValue(value) {
 }
 
 /**
+ * Compile a grammatically correct English list from an array of strings (e.g. "A, B, and C")
+ */
+export function formatList(items) {
+  if (!items || items.length === 0) return '';
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  
+  const lastItem = items[items.length - 1];
+  const otherItems = items.slice(0, -1).join(', ');
+  return `${otherItems}, and ${lastItem}`;
+}
+
+/**
  * Compile selections and custom texts into a highly structured, professional architectural briefing
  * @param {Array} schema - The prompt carriage schema
- * @param {Object} selections - User option selections (carriageId -> optionId)
+ * @param {Object} selections - User option selections (carriageId -> optionId/Array/Boolean)
  * @param {Object} customTexts - User custom text inputs (carriageId -> customText)
  * @param {Array} sentenceConfig - Configuration for compiling groups of parts into sentences
  */
 export function assemblePrompt(schema, selections, customTexts, sentenceConfig) {
   if (!schema || !Array.isArray(schema)) return '';
   
-  // 1. Gather all active/resolved values for each carriage in order
   const resolvedValues = {};
   
-  schema.forEach((item) => {
-    const selectedId = selections?.[item.id];
-    if (!selectedId) return; // Skip if no selection
+  // 1. INJECT IMPLICIT CGI brief FOUNDATION (HIDDEN PRO DIRECTIVES)
+  resolvedValues['role'] = {
+    value: 'Act as a professional CGI director and architectural photographer',
+    semanticPart: 'role'
+  };
 
+  resolvedValues['task'] = {
+    value: 'Generate a stunning architectural visualization rendering',
+    semanticPart: 'task'
+  };
+
+  // 2. PROCESS USER-CONFIGURED SPECIFICATIONS
+  schema.forEach((item) => {
+    const selection = selections?.[item.id];
+    if (selection === undefined || selection === null) return;
+
+    // Special Case A: Geometry Toggle
+    if (item.id === 'geometry') {
+      if (selection === true) {
+        resolvedValues['geometry'] = {
+          value: 'with instruction to preserve existing structural massing, facade geometry, and original roofline',
+          semanticPart: 'geometry'
+        };
+      }
+      return;
+    }
+
+    // Special Case B: Materiality Multi-select + Custom text
+    if (item.id === 'material') {
+      const selectedIds = Array.isArray(selection) ? selection : [];
+      const materialParts = [];
+
+      // Collect standard options
+      selectedIds.forEach((id) => {
+        const opt = item.options?.find(o => o.id === id);
+        if (opt && opt.value) {
+          materialParts.push(opt.value);
+        }
+      });
+
+      // Add custom manual input if present
+      const customText = customTexts?.[item.id] || '';
+      const cleanCustom = sanitizeValue(customText);
+      if (cleanCustom) {
+        materialParts.push(cleanCustom);
+      }
+
+      if (materialParts.length > 0) {
+        const materialList = formatList(materialParts);
+        resolvedValues['material'] = {
+          value: `featuring high-fidelity representation of ${materialList} materiality`,
+          semanticPart: 'material'
+        };
+      }
+      return;
+    }
+
+    // Standard Single-select Inputs
     let valueToInject = '';
 
-    if (selectedId === 'custom') {
+    if (selection === 'custom') {
       const rawText = customTexts?.[item.id] || '';
       valueToInject = sanitizeValue(rawText);
-    } else {
-      const option = item.options?.find(opt => opt.id === selectedId);
+    } else if (typeof selection === 'string') {
+      const option = item.options?.find(opt => opt.id === selection);
       if (option) {
         valueToInject = sanitizeValue(option.value);
       }
     }
 
     if (valueToInject) {
-      // Replace [VALUE] in template, and sanitize spacing
       const resolvedTemplate = item.template.replace('[VALUE]', valueToInject).trim();
       resolvedValues[item.id] = {
         value: resolvedTemplate,
-        semanticPart: item.semanticPart || 'subject', // Fall back dynamically injected ones to subject
-        order: item.order || 99
+        semanticPart: item.semanticPart || 'subject'
       };
     }
   });
 
-  // 2. Map sentence configurations
-  const sentences = [];
+  // 3. INJECT CAMERA LENS DEFAULT DIRECTIVE (Implicit Perspective Control)
+  const userCamera = resolvedValues['camera_angle']?.value || '';
+  if (userCamera) {
+    resolvedValues['camera_angle'].value = `${userCamera} using a high-end tilt-shift lens to ensure perfect vertical correction, parallel vertical lines, and no keystone distortion`;
+  } else {
+    // If no camera angle selected, inject the implicit perspective control as a standalone camera parameter
+    resolvedValues['camera_angle'] = {
+      value: 'captured with a high-end tilt-shift lens to ensure perfect vertical correction, parallel vertical lines, and no keystone distortion',
+      semanticPart: 'camera'
+    };
+  }
 
+  // 4. INJECT IMPLICIT MATERIAL QUALITY DEFAULT DIRECTIVE
+  // If the user selected materials, append glass reflection context to enrich details
+  if (resolvedValues['material']) {
+    resolvedValues['material'].value += ' with realistic glass reflection, refraction, and enhanced micro-surface texture resolution';
+  } else {
+    resolvedValues['material'] = {
+      value: 'featuring high-fidelity material representation, realistic glass reflection and refraction, and enhanced micro-surface texture resolution',
+      semanticPart: 'material'
+    };
+  }
+
+  // 5. INJECT IMPLICIT OUTPUT & POST-PROCESSING DEFAULT DIRECTIVE
+  resolvedValues['output'] = {
+    value: 'rendered at photorealistic ultra-high definition, with filmic clean post-processing and neutral 5500k color science, suitable for Archdaily publication',
+    semanticPart: 'output'
+  };
+
+  // 6. ASSEMBLE SENTENCES
+  const sentences = [];
   const config = sentenceConfig || [];
 
   config.forEach((sentenceDef) => {
-    // Collect all resolved values belonging to the parts in this sentence
     const partsInSentence = [];
     
-    // We sort the parts based on their schema order
-    schema
-      .filter(item => sentenceDef.parts.includes(item.semanticPart || 'subject'))
-      .forEach(item => {
-        if (resolvedValues[item.id]) {
-          partsInSentence.push(resolvedValues[item.id]);
+    // Maintain chronological sorting based on schema definition
+    schema.forEach(item => {
+      if (resolvedValues[item.id] && sentenceDef.parts.includes(item.semanticPart || 'subject')) {
+        partsInSentence.push(resolvedValues[item.id]);
+      }
+    });
+
+    // Also include implicit values that don't map directly to schema keys but are in resolvedValues (e.g. role, task, output)
+    sentenceDef.parts.forEach(part => {
+      // Find entries in resolvedValues that are implicit and belong to this semantic part
+      Object.keys(resolvedValues).forEach(key => {
+        const isImplicit = !schema.some(s => s.id === key);
+        if (isImplicit && resolvedValues[key].semanticPart === part) {
+          partsInSentence.push(resolvedValues[key]);
         }
       });
+    });
 
-    if (partsInSentence.length === 0) return; // Skip empty sentences
+    if (partsInSentence.length === 0) return;
 
-    // Join all parts with the sentence's separator (e.g. ', ')
     const separator = sentenceDef.separator || ' ';
     const bodyText = partsInSentence
       .map(p => p.value)
@@ -83,14 +182,10 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
 
     if (!bodyText) return;
 
-    // Apply prefix and suffix
     const prefix = sentenceDef.prefix || '';
-    let suffix = sentenceDef.suffix || '.';
+    const suffix = sentenceDef.suffix || '.';
 
-    // Assemble sentence and clean up formatting
     let fullSentence = `${prefix}${bodyText}`;
-    
-    // Ensure it ends with exactly one dot or suffix
     fullSentence = fullSentence.trim().replace(/[.,;]+$/, '');
     fullSentence = `${fullSentence}${suffix}`;
 
@@ -100,27 +195,5 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
     sentences.push(fullSentence);
   });
 
-  // 3. Handle any orphaned carriages (e.g., dynamically injected carriages whose semanticParts don't match any sentence config)
-  const mappedSemanticParts = new Set(config.flatMap(c => c.parts));
-  const orphans = [];
-
-  schema.forEach(item => {
-    if (resolvedValues[item.id]) {
-      const partType = item.semanticPart || 'subject';
-      if (!mappedSemanticParts.has(partType)) {
-        orphans.push(resolvedValues[item.id]);
-      }
-    }
-  });
-
-  if (orphans.length > 0) {
-    let orphanText = orphans.map(o => o.value).join(', ').trim().replace(/[.,;]+$/, '');
-    if (orphanText) {
-      orphanText = orphanText.charAt(0).toUpperCase() + orphanText.slice(1) + '.';
-      sentences.push(orphanText);
-    }
-  }
-
-  // 4. Join all sentences with a single space
   return sentences.join(' ').replace(/\s+/g, ' ').trim();
 }

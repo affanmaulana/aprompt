@@ -9,50 +9,30 @@ function App() {
   const [customTexts, setCustomTexts] = useLocalStorage("aprompt_customTexts", {});
   const [activeTab, setActiveTab] = useState("builder"); // builder | preview
 
-  // Aprompt v2 state persistence
-  const [openGroups, setOpenGroups] = useLocalStorage("aprompt_openGroups", { project: true });
-  const [collapsedSections, setCollapsedSections] = useLocalStorage("aprompt_collapsedSections", {});
-  const [searchQuery, setSearchQuery] = useLocalStorage("aprompt_searchQuery", "");
-
-  // Legacy Data Migration (v1 -> v2)
+  // Strict Mount Cleanup: Keep only active keys from the new schema
   useEffect(() => {
-    let migrated = false;
+    const activeKeys = new Set(promptSchema.map(item => item.id));
+    let cleaned = false;
+
     const newSelections = { ...selections };
     const newCustomTexts = { ...customTexts };
 
-    // Migrate 'source' carriage
-    if (selections.source) {
-      if (selections.source === 'sketchup') {
-        newSelections.render_quality = 'custom';
-        newCustomTexts.render_quality = 'raw 3D Sketchup clay render';
-      } else if (selections.source === 'hand_sketch') {
-        newSelections.render_quality = 'custom';
-        newCustomTexts.render_quality = 'hand-drawn architectural ink sketch';
-      } else if (selections.source === 'custom' && customTexts.source) {
-        newSelections.render_quality = 'custom';
-        newCustomTexts.render_quality = customTexts.source;
+    // Delete keys not present in new schema
+    Object.keys(newSelections).forEach(key => {
+      if (!activeKeys.has(key)) {
+        delete newSelections[key];
+        cleaned = true;
       }
-      delete newSelections.source;
-      delete newCustomTexts.source;
-      migrated = true;
-    }
+    });
 
-    // Migrate 'environment' carriage
-    if (selections.environment) {
-      if (selections.environment === 'golden_hour') {
-        newSelections.lighting = 'golden_hour';
-      } else if (selections.environment === 'overcast') {
-        newSelections.lighting = 'overcast_soft_light';
-      } else if (selections.environment === 'custom' && customTexts.environment) {
-        newSelections.lighting = 'custom';
-        newCustomTexts.lighting = customTexts.environment;
+    Object.keys(newCustomTexts).forEach(key => {
+      if (!activeKeys.has(key)) {
+        delete newCustomTexts[key];
+        cleaned = true;
       }
-      delete newSelections.environment;
-      delete newCustomTexts.environment;
-      migrated = true;
-    }
+    });
 
-    if (migrated) {
+    if (cleaned) {
       setSelections(newSelections);
       setCustomTexts(newCustomTexts);
     }
@@ -60,10 +40,45 @@ function App() {
   }, []);
 
   const handleSelectionChange = (carriageId, optionId) => {
-    setSelections((prev) => ({
-      ...prev,
-      [carriageId]: optionId,
-    }));
+    setSelections((prev) => {
+      const prevVal = prev[carriageId];
+      
+      // 1. Handle Geometry Boolean Toggle
+      if (carriageId === 'geometry') {
+        return {
+          ...prev,
+          [carriageId]: optionId === true
+        };
+      }
+      
+      // 2. Handle Material Multi-Select Array Toggle
+      if (carriageId === 'material') {
+        const currentArray = Array.isArray(prevVal) ? prevVal : [];
+        if (currentArray.includes(optionId)) {
+          return {
+            ...prev,
+            [carriageId]: currentArray.filter(id => id !== optionId)
+          };
+        } else {
+          return {
+            ...prev,
+            [carriageId]: [...currentArray, optionId]
+          };
+        }
+      }
+      
+      // 3. Default Single-Select: toggle off if selected again
+      if (prevVal === optionId) {
+        const nextSelections = { ...prev };
+        delete nextSelections[carriageId];
+        return nextSelections;
+      }
+      
+      return {
+        ...prev,
+        [carriageId]: optionId,
+      };
+    });
   };
 
   const handleCustomTextChange = (carriageId, text) => {
@@ -74,23 +89,20 @@ function App() {
   };
 
   const handleReset = () => {
-    // Clear localStorage and reset state
     window.localStorage.removeItem("aprompt_selections");
     window.localStorage.removeItem("aprompt_customTexts");
-    window.localStorage.removeItem("aprompt_openGroups");
-    window.localStorage.removeItem("aprompt_collapsedSections");
-    window.localStorage.removeItem("aprompt_searchQuery");
-    
     setSelections({});
     setCustomTexts({});
-    setOpenGroups({ project: true });
-    setCollapsedSections({});
-    setSearchQuery("");
   };
 
   // Check if user has made any selections or entered custom text
   const hasSelections = Object.keys(selections).some(
-    (key) => selections[key] && (selections[key] !== "custom" || (customTexts[key] && customTexts[key].trim()))
+    (key) => {
+      const val = selections[key];
+      if (Array.isArray(val)) return val.length > 0;
+      if (typeof val === 'boolean') return val === true;
+      return val && (val !== "custom" || (customTexts[key] && customTexts[key].trim()));
+    }
   );
 
   return (
@@ -103,12 +115,6 @@ function App() {
         onCustomTextChange={handleCustomTextChange}
         onReset={handleReset}
         activeTab={activeTab}
-        openGroups={openGroups}
-        setOpenGroups={setOpenGroups}
-        collapsedSections={collapsedSections}
-        setCollapsedSections={setCollapsedSections}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
       />
       <RightPanel
         schema={promptSchema}

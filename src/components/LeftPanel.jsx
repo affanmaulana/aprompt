@@ -1,13 +1,14 @@
-import { RotateCcw, Search, ChevronDown, ChevronUp, X, Building2, Camera, Sun, Users, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { RotateCcw, Sparkles, Building2, Camera, Sun, Users } from "lucide-react";
 import { carriageGroups } from "../data/schema";
-import CarriageInput from "./CarriageInput";
+import ModuleInput from "./ModuleInput";
 
 const iconMap = {
+  Sparkles: Sparkles,
   Building2: Building2,
   Camera: Camera,
   Sun: Sun,
-  Users: Users,
-  Sparkles: Sparkles
+  Users: Users
 };
 
 export default function LeftPanel({
@@ -17,196 +18,162 @@ export default function LeftPanel({
   onSelectionChange,
   onCustomTextChange,
   onReset,
-  activeTab,
-  openGroups,
-  setOpenGroups,
-  collapsedSections,
-  setCollapsedSections,
-  searchQuery,
-  setSearchQuery
+  activeTab
 }) {
+  const [activeSection, setActiveSection] = useState("essentials");
 
-  // Group toggle
-  const handleToggleGroup = (groupId) => {
-    setOpenGroups((prev) => ({
-      ...prev,
-      [groupId]: !prev[groupId]
-    }));
-  };
+  // Track active section on scroll using IntersectionObserver
+  useEffect(() => {
+    const scrollContainer = document.getElementById("specifications-scroll-container");
+    if (!scrollContainer) return;
 
-  // Individual carriage collapse/expand toggle
-  const handleToggleCollapse = (itemId) => {
-    // If it's already in collapsedSections as false, it's expanded. Toggling it sets it to true (collapsed).
-    // If it's not in collapsedSections (or is true), it is collapsed by default. Toggling it sets it to false (expanded).
-    setCollapsedSections((prev) => ({
-      ...prev,
-      [itemId]: prev[itemId] === false ? true : false
-    }));
-  };
+    const observerOptions = {
+      root: scrollContainer,
+      rootMargin: "-10% 0px -75% 0px", // Detect when section is active near top
+      threshold: 0
+    };
 
-  // Search filter matching
-  const matchesSearch = (item) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase().trim();
-    
-    // Check title
-    const titleMatch = item.title?.toLowerCase().includes(query);
-    
-    // Check options
-    const optionsMatch = item.options?.some(
-      opt => opt.label?.toLowerCase().includes(query) || opt.value?.toLowerCase().includes(query)
-    );
-    
-    return titleMatch || optionsMatch;
-  };
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const groupId = entry.target.id.replace("section-", "");
+          setActiveSection(groupId);
+        }
+      });
+    };
 
-  // Filter carriages
-  const filteredSchema = schema.filter(matchesSearch);
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
 
-  // Reset search
-  const handleClearSearch = () => {
-    setSearchQuery("");
+    carriageGroups.forEach((group) => {
+      const el = document.getElementById(`section-${group.id}`);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [schema, activeTab]);
+
+  // Smooth scroll to target anchor
+  const handleScrollToSection = (groupId) => {
+    const el = document.getElementById(`section-${groupId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setActiveSection(groupId);
+    }
   };
 
   return (
     <div
-      className={`w-full lg:w-[45%] h-full bg-stone-50 border-r border-zinc-200 flex flex-col relative z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.06)] transition-all duration-300 ${
+      className={`w-full lg:w-[45%] h-full bg-stone-50 border-r border-zinc-200 flex flex-col relative z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.04)] transition-all duration-300 ${
         activeTab === "builder" ? "flex" : "hidden lg:flex"
       }`}
     >
-      {/* Premium Header */}
-      <div className="px-8 py-6 lg:px-10 lg:py-8 border-b border-zinc-200/60 flex-shrink-0 bg-stone-50/90 backdrop-blur-md sticky top-0 z-20">
-        <div className="flex justify-between items-start">
+      <div className="flex-1 flex flex-row overflow-hidden">
+        
+        {/* ==================================================================
+            LEFT COLUMN: 30% Index Sidebar Navigation
+            ================================================================== */}
+        <div className="w-[32%] border-r border-zinc-150 py-8 pl-8 pr-3 flex flex-col justify-between flex-shrink-0 bg-stone-50/70 select-none">
           <div>
-            <h1 className="text-3xl font-display font-extrabold tracking-tighter text-zinc-900 leading-none">
-              APROMPT
-            </h1>
-            <p className="text-xs font-sans text-zinc-400 mt-2 font-bold tracking-wider uppercase">
-              Architectural Prompt Intelligence OS
-            </p>
+            <div className="mb-10">
+              <h1 className="text-2xl font-display font-extrabold tracking-tighter text-zinc-900 leading-none">
+                APROMPT
+              </h1>
+              <span className="text-[9px] font-sans font-bold uppercase tracking-widest text-zinc-400 block mt-2">
+                STUDIO OS
+              </span>
+            </div>
+
+            {/* Sidebar Anchor Links */}
+            <nav className="flex flex-col gap-6">
+              {carriageGroups
+                .sort((a, b) => a.order - b.order)
+                .map((group) => {
+                  const isActive = activeSection === group.id;
+                  const GroupIcon = iconMap[group.icon] || Sparkles;
+                  return (
+                    <button
+                      key={group.id}
+                      onClick={() => handleScrollToSection(group.id)}
+                      className={`flex items-center gap-2.5 text-left transition-all duration-200 group/nav cursor-pointer ${
+                        isActive
+                          ? "text-zinc-950 font-bold translate-x-1"
+                          : "text-zinc-400 hover:text-zinc-700 font-medium"
+                      }`}
+                    >
+                      <GroupIcon className={`w-3.5 h-3.5 transition-all ${
+                        isActive ? "text-zinc-950" : "text-zinc-350 group-hover/nav:text-zinc-550"
+                      }`} />
+                      <span className="text-xs font-sans tracking-wide">
+                        {group.title}
+                      </span>
+                    </button>
+                  );
+                })}
+            </nav>
+          </div>
+
+          {/* Quick reset inside left sub-column bottom */}
+          <div>
+            <button
+              onClick={onReset}
+              title="Reset configuration"
+              className="flex items-center justify-center p-3 rounded-xl border border-zinc-200 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 hover:border-zinc-350 transition-all cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        {/* Sleek Search Filter */}
-        <div className="mt-6 relative">
-          <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-zinc-400" />
-          </span>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search architectural carriages, styles, settings..."
-            className="w-full pl-10 pr-10 py-3 bg-white border border-zinc-200 rounded-xl text-sm font-sans text-zinc-800 placeholder-zinc-400 focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
-          />
-          {searchQuery && (
-            <button
-              onClick={handleClearSearch}
-              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-zinc-400 hover:text-black cursor-pointer"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-      </div>
+        {/* ==================================================================
+            RIGHT COLUMN: 70% Scrollable Content Area
+            ================================================================== */}
+        <div
+          id="specifications-scroll-container"
+          className="w-[68%] h-full overflow-y-auto px-8 py-8 flex flex-col scroll-smooth bg-white"
+        >
+          {carriageGroups
+            .sort((a, b) => a.order - b.order)
+            .map((group) => {
+              const groupCarriages = schema.filter((c) => c.group === group.id);
+              if (groupCarriages.length === 0) return null;
 
-      {/* Accordion List Container */}
-      <div className="flex-1 overflow-y-auto px-8 py-6 lg:px-10 scroll-smooth">
-        {carriageGroups
-          .sort((a, b) => a.order - b.order)
-          .map((group) => {
-            // Find carriages belonging to this group
-            const groupCarriages = filteredSchema.filter((c) => c.group === group.id);
-            
-            // Skip group if search returns nothing in this group
-            if (groupCarriages.length === 0) return null;
-
-            // Auto-expand group if there is a search query and it matches carriages inside
-            const hasMatches = searchQuery.trim().length > 0;
-            const isOpen = hasMatches ? true : !!openGroups[group.id];
-            
-            const GroupIcon = iconMap[group.icon] || Building2;
-
-            return (
-              <div
-                key={group.id}
-                className="mb-4 last:mb-0 border border-zinc-200/60 rounded-2xl bg-white overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.01)]"
-              >
-                {/* Accordion Header Button */}
-                <button
-                  onClick={() => !hasMatches && handleToggleGroup(group.id)}
-                  disabled={hasMatches} // Disable toggle when searching (force expand)
-                  className={`w-full px-6 py-4.5 flex justify-between items-center text-left transition-all hover:bg-zinc-50/50 cursor-pointer ${
-                    isOpen ? "border-b border-zinc-100 bg-zinc-50/10" : ""
-                  }`}
+              return (
+                <div
+                  key={group.id}
+                  id={`section-${group.id}`}
+                  className="mb-10 last:mb-0 pt-4 first:pt-0 border-t border-zinc-100 first:border-t-0"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg ${isOpen ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-500'} transition-all`}>
-                      <GroupIcon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="text-sm font-display font-bold text-zinc-950 tracking-wide">
-                        {group.title}
-                      </span>
-                      <span className="text-[10px] text-zinc-400 font-sans block mt-0.5 font-medium">
-                        {groupCarriages.length} {groupCarriages.length === 1 ? 'carriage' : 'carriages'} active
-                      </span>
-                    </div>
+                  {/* Elegant Section Title */}
+                  <div className="mb-4">
+                    <h2 className="text-sm font-display font-extrabold text-zinc-950 tracking-wide">
+                      {group.title}
+                    </h2>
+                    <span className="h-0.5 w-6 bg-zinc-950 block mt-1.5" />
                   </div>
-                  {!hasMatches && (
-                    <div>
-                      {isOpen ? (
-                        <ChevronUp className="w-4 h-4 text-zinc-400" />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-zinc-400" />
-                      )}
-                    </div>
-                  )}
-                </button>
 
-                {/* Accordion Content */}
-                {isOpen && (
-                  <div className="p-6 bg-stone-50/30 animate-in fade-in slide-in-from-top-1 duration-200">
+                  {/* Render modules within group */}
+                  <div className="flex flex-col">
                     {groupCarriages
                       .sort((a, b) => a.order - b.order)
-                      .map((item) => {
-                        // Collapse logic: if a value is selected, collapse by default unless user expanded it
-                        const isCollapsed =
-                          !!selections[item.id] &&
-                          collapsedSections[item.id] !== false;
-
-                        return (
-                          <CarriageInput
-                            key={item.id}
-                            item={item}
-                            selectedValue={selections[item.id]}
-                            customText={customTexts[item.id]}
-                            onChange={onSelectionChange}
-                            onCustomTextChange={onCustomTextChange}
-                            isCollapsed={isCollapsed}
-                            onToggleCollapse={() => handleToggleCollapse(item.id)}
-                          />
-                        );
-                      })}
+                      .map((item) => (
+                        <ModuleInput
+                          key={item.id}
+                          item={item}
+                          selectedValue={selections[item.id]}
+                          customText={customTexts[item.id]}
+                          onChange={onSelectionChange}
+                          onCustomTextChange={onCustomTextChange}
+                        />
+                      ))}
                   </div>
-                )}
-              </div>
-            );
-          })}
+                </div>
+              );
+            })}
 
-        {/* Safe padding spacing for the floating mobile tab navigator */}
-        <div className="h-24 lg:h-8"></div>
-      </div>
+          {/* Spacer for bottom scrolling freedom */}
+          <div className="h-48 flex-shrink-0" />
+        </div>
 
-      {/* Footer Reset Actions */}
-      <div className="p-6 lg:px-10 lg:py-6 border-t border-zinc-200/60 flex-shrink-0 bg-stone-50">
-        <button
-          onClick={onReset}
-          className="flex items-center justify-center w-full py-3.5 px-4 rounded-xl text-sm font-sans font-bold text-zinc-500 bg-white hover:bg-zinc-100 hover:text-zinc-900 transition-all border border-zinc-200 hover:border-zinc-300 focus:ring-2 focus:ring-zinc-200 focus:outline-none cursor-pointer"
-        >
-          <RotateCcw className="w-4 h-4 mr-2" />
-          Reset Configuration
-        </button>
       </div>
     </div>
   );
