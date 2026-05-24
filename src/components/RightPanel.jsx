@@ -62,11 +62,37 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
               </p>
             )}
           </div>
+
+          {/* Mobile Copy Button (In-flow below the prompt, completely safe from overlap/viewport bugs) */}
+          {generatedPrompt && (
+            <div className="lg:hidden mt-4">
+              <button
+                onClick={handleCopy}
+                className={`flex items-center justify-center w-full px-8 py-4 rounded-xl text-sm font-sans font-bold transition-all duration-300 cursor-pointer shadow-lg active:scale-95 ${
+                  copied
+                    ? "bg-accent text-white shadow-xl shadow-accent/20"
+                    : "bg-black text-white"
+                }`}
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-5 h-5 mr-3" />
+                    {t('action.copied', 'Copied to Clipboard')}
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-5 h-5 mr-3" />
+                    {t('action.copy', 'Copy Prompt')}
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Sticky Bottom Bar containing the Copy Button (pb-24 on mobile to lift it above the floating tab switcher) */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 pb-24 lg:p-10 bg-gradient-to-t from-white via-white/95 to-white/0 flex justify-center z-20 pointer-events-none select-none">
+      {/* Sticky Bottom Bar containing the Copy Button (Desktop Only) */}
+      <div className="hidden lg:flex absolute bottom-0 left-0 right-0 p-6 lg:p-10 bg-gradient-to-t from-white via-white/95 to-white/0 justify-center z-20 pointer-events-none select-none">
         <div className="max-w-4xl w-full mx-auto flex justify-end pointer-events-auto">
           <button
             onClick={handleCopy}
