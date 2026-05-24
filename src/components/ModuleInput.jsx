@@ -8,6 +8,25 @@ export default function ModuleInput({
 }) {
   const formattedIndex = index !== undefined ? `${String(index).padStart(2, '0')} / ` : '';
 
+  // Get premium, communicative placeholder text based on module ID and context
+  const getPlaceholderText = () => {
+    if (item.id === 'material') {
+      return "Add specific materials or custom textures (e.g., micro-cement, warm teakwood, brushed steel)...";
+    }
+    if (item.id === 'subject') {
+      return "Describe your subject in more detail (e.g., a two-story modern house with large glass windows)...";
+    }
+    if (item.id === 'arch_style') {
+      return "Elaborate on the architectural style (e.g., Minimalist Japandi blend with organic curves)...";
+    }
+    if (item.allowDetailInput) {
+      return `Add custom details for ${item.title.toLowerCase()} (e.g., specify angles, lighting accents, or specific placements)...`;
+    }
+    return "Describe your custom preference here in detail...";
+  };
+
+  const inputClassName = "w-full mt-4 px-4 py-3 rounded-xl border border-zinc-200 bg-zinc-50/30 text-xs font-sans text-zinc-800 placeholder-zinc-400 hover:bg-zinc-50/70 hover:border-zinc-350 focus:bg-white focus:border-zinc-950 focus:ring-1 focus:ring-zinc-950 focus:outline-none transition-all duration-200 shadow-[inset_0_1px_2px_rgba(0,0,0,0.01)]";
+
   // 1. Render Materiality Multi-Select
   if (item.type === 'multi-select') {
     const selectedIds = Array.isArray(selectedValue) ? selectedValue : [];
@@ -39,8 +58,8 @@ export default function ModuleInput({
           type="text"
           value={customText || ""}
           onChange={(e) => onCustomTextChange(item.id, e.target.value)}
-          placeholder="Additional materials (e.g. polished brass, Venetian plaster)..."
-          className="w-full mt-3 px-1 py-2 border-b border-zinc-200 focus:border-zinc-950 text-xs font-sans text-zinc-800 placeholder-zinc-400 bg-transparent focus:outline-none transition-all"
+          placeholder={getPlaceholderText()}
+          className={inputClassName}
         />
       </div>
     );
@@ -77,8 +96,8 @@ export default function ModuleInput({
           type="text"
           value={customText || ""}
           onChange={(e) => onCustomTextChange(item.id, e.target.value)}
-          placeholder={`Supplementary details (e.g. specify context for ${item.title.toLowerCase()})...`}
-          className="w-full mt-3 px-1 py-2 border-b border-zinc-200 focus:border-zinc-950 text-xs font-sans text-zinc-800 placeholder-zinc-400 bg-transparent focus:outline-none transition-all"
+          placeholder={getPlaceholderText()}
+          className={inputClassName}
         />
       )}
 
@@ -87,8 +106,8 @@ export default function ModuleInput({
           type="text"
           value={customText || ""}
           onChange={(e) => onCustomTextChange(item.id, e.target.value)}
-          placeholder="Type custom specification here..."
-          className="w-full mt-3 px-1 py-2 border-b border-zinc-200 focus:border-zinc-950 text-xs font-sans text-zinc-800 placeholder-zinc-400 bg-transparent focus:outline-none transition-all animate-in fade-in duration-150"
+          placeholder={getPlaceholderText()}
+          className={`${inputClassName} animate-in fade-in duration-150`}
         />
       )}
     </div>
