@@ -36,30 +36,51 @@ export function formatList(items) {
  */
 export function assemblePrompt(schema, selections, customTexts, sentenceConfig) {
   if (!schema || !Array.isArray(schema)) return '';
+
+  const localSelections = selections ? { ...selections } : {};
+  const localCustomTexts = customTexts ? { ...customTexts } : {};
+
+  // 0. SEMANTIC CLASH CLEANUP (Engine-level safety)
+  if (localSelections['human_presence'] === 'no_humans') {
+    delete localSelections['human_activity'];
+    delete localCustomTexts['human_activity'];
+    if (localSelections['motion'] === 'selective_motion_blur_on_figures' || localSelections['motion'] === 'crowd_motion_blur') {
+      delete localSelections['motion'];
+    }
+  }
+
+  const selectedVehicle = localSelections['vehicle'];
+  if (Array.isArray(selectedVehicle) && selectedVehicle.includes('no_vehicles')) {
+    localSelections['vehicle'] = ['no_vehicles'];
+    delete localCustomTexts['vehicle'];
+    if (localSelections['motion'] === 'vehicle_motion_trail') {
+      delete localSelections['motion'];
+    }
+  }
   
   const resolvedValues = {};
   
   // 1. INJECT IMPLICIT CGI brief FOUNDATION (HIDDEN PRO DIRECTIVES)
   resolvedValues['role'] = {
-    value: 'Act as a professional CGI director and architectural photographer',
+    value: 'Act as a professional CGI director and architectural photographer specializing in high-fidelity architectural preservation',
     semanticPart: 'role'
   };
 
   resolvedValues['task'] = {
-    value: 'Generate a stunning architectural visualization rendering',
+    value: 'Generate a stunning, accurate architectural visualization rendering',
     semanticPart: 'task'
   };
 
   // Implicit Geometry Preservation (Always Yes)
   resolvedValues['geometry'] = {
-    value: 'with instruction to preserve existing structural massing, facade geometry, and original roofline',
+    value: 'with strict instruction to preserve the existing structural massing, original facade geometry, and original roofline, ensuring absolutely no architectural elements are altered, added, or removed, and explicitly preventing any structural elements from being replaced by surrounding landscaping, lush vegetation, or other environmental features',
     semanticPart: 'geometry'
   };
 
   // 2. PROCESS USER-CONFIGURED SPECIFICATIONS
   schema.forEach((item) => {
-    const selection = selections?.[item.id];
-    const customText = customTexts?.[item.id] || '';
+    const selection = localSelections[item.id];
+    const customText = localCustomTexts[item.id] || '';
 
     // If both selections and custom text are empty, skip entirely
     const hasSelection = selection !== undefined && selection !== null && selection !== '';

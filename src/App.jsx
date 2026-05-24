@@ -4,11 +4,13 @@ import { useLocalStorage } from "./hooks/useLocalStorage";
 import { promptSchema } from "./data/schema";
 import LeftPanel from "./components/LeftPanel";
 import RightPanel from "./components/RightPanel";
+import { useLanguage } from "./context/LanguageContext";
 
 function App() {
   const [selections, setSelections] = useLocalStorage("aprompt_selections", {});
   const [customTexts, setCustomTexts] = useLocalStorage("aprompt_customTexts", {});
   const [activeTab, setActiveTab] = useState("builder"); // builder | preview
+  const { t } = useLanguage();
 
   // Strict Mount Cleanup: Keep only active keys from the new schema
   useEffect(() => {
@@ -58,6 +60,41 @@ function App() {
       
       if (isMultiSelect) {
         const currentArray = Array.isArray(prevVal) ? prevVal : [];
+        
+        // Premium multi-select mutual exclusivity for vehicle 'no_vehicles'
+        if (carriageId === 'vehicle') {
+          if (optionId === 'no_vehicles') {
+            // Selecting "No Vehicles" removes all other vehicles and custom details
+            if (currentArray.includes('no_vehicles')) {
+              return {
+                ...prev,
+                [carriageId]: []
+              };
+            } else {
+              setCustomTexts((prevCustom) => ({ ...prevCustom, vehicle: "" }));
+              let nextSelections = { ...prev, [carriageId]: ['no_vehicles'] };
+              if (prev.motion === 'vehicle_motion_trail') {
+                delete nextSelections.motion;
+              }
+              return nextSelections;
+            }
+          } else {
+            // Selecting any other vehicle removes "No Vehicles"
+            const filtered = currentArray.filter(id => id !== 'no_vehicles');
+            if (filtered.includes(optionId)) {
+              return {
+                ...prev,
+                [carriageId]: filtered.filter(id => id !== optionId)
+              };
+            } else {
+              return {
+                ...prev,
+                [carriageId]: [...filtered, optionId]
+              };
+            }
+          }
+        }
+        
         if (currentArray.includes(optionId)) {
           return {
             ...prev,
@@ -78,10 +115,23 @@ function App() {
         return nextSelections;
       }
       
-      return {
+      let nextSelections = {
         ...prev,
         [carriageId]: optionId,
       };
+
+      // Clash Prevention logic for single-selects
+      if (carriageId === 'human_presence' && optionId === 'no_humans') {
+        // Clear human activities and custom details
+        delete nextSelections.human_activity;
+        setCustomTexts((prevCustom) => ({ ...prevCustom, human_activity: "" }));
+        // Clear human-related motions
+        if (prev.motion === 'selective_motion_blur_on_figures' || prev.motion === 'crowd_motion_blur') {
+          delete nextSelections.motion;
+        }
+      }
+      
+      return nextSelections;
     });
   };
 
@@ -97,6 +147,100 @@ function App() {
     window.localStorage.removeItem("aprompt_customTexts");
     setSelections({});
     setCustomTexts({});
+  };
+
+  const handleRandomize = () => {
+    const newSelections = {};
+    const newCustomTexts = {};
+
+    // 1. Decide human presence randomly to handle activities and motion clashes safely
+    const humanPresenceItem = promptSchema.find(s => s.id === "human_presence");
+    let chosenHumanPresence = null;
+    if (humanPresenceItem) {
+      const stdOptions = humanPresenceItem.options || [];
+      if (stdOptions.length > 0) {
+        const randOpt = stdOptions[Math.floor(Math.random() * stdOptions.length)];
+        chosenHumanPresence = randOpt.id;
+        newSelections["human_presence"] = chosenHumanPresence;
+      }
+    }
+
+    // 2. Decide vehicle presence randomly to handle motion clashes safely
+    const vehicleItem = promptSchema.find(s => s.id === "vehicle");
+    let isNoVehicles = false;
+    if (vehicleItem) {
+      const stdOptions = vehicleItem.options || [];
+      if (stdOptions.length > 0) {
+        const randVal = Math.random();
+        if (randVal < 0.25) {
+          newSelections["vehicle"] = ["no_vehicles"];
+          isNoVehicles = true;
+        } else {
+          // Select 1 to 2 random vehicles (excluding no_vehicles and custom)
+          const filteredOptions = stdOptions.filter(o => o.id !== "no_vehicles" && o.id !== "custom");
+          const shuffled = [...filteredOptions].sort(() => 0.5 - Math.random());
+          const count = Math.random() < 0.7 ? 1 : 2;
+          const chosen = shuffled.slice(0, count).map(o => o.id);
+          newSelections["vehicle"] = chosen;
+        }
+      }
+    }
+
+    // 3. Randomize other carriage options in the schema
+    promptSchema.forEach((item) => {
+      if (item.id === "human_presence" || item.id === "vehicle") return;
+
+      // Handle clash prevention for human_activity
+      if (item.id === "human_activity" && chosenHumanPresence === "no_humans") {
+        return;
+      }
+
+      // Handle clash prevention for motion blurring options
+      if (item.id === "motion") {
+        const stdOptions = item.options || [];
+        let allowedOptions = [...stdOptions];
+        if (chosenHumanPresence === "no_humans") {
+          allowedOptions = allowedOptions.filter(o => o.id !== "selective_motion_blur_on_figures" && o.id !== "crowd_motion_blur");
+        }
+        if (isNoVehicles) {
+          allowedOptions = allowedOptions.filter(o => o.id !== "vehicle_motion_trail");
+        }
+        allowedOptions = allowedOptions.filter(o => o.id !== "custom");
+
+        if (allowedOptions.length > 0) {
+          const randOpt = allowedOptions[Math.floor(Math.random() * allowedOptions.length)];
+          newSelections["motion"] = randOpt.id;
+        }
+        return;
+      }
+
+      // Standard multi-select items
+      const stdOptions = item.options || [];
+      if (stdOptions.length === 0) return;
+
+      if (item.type === "multi-select") {
+        const filteredOptions = stdOptions.filter(o => o.id !== "custom");
+        const shuffled = [...filteredOptions].sort(() => 0.5 - Math.random());
+        const randVal = Math.random();
+        let count = 1;
+        if (randVal < 0.15) count = 0;
+        else if (randVal > 0.75) count = 2;
+
+        if (count > 0) {
+          newSelections[item.id] = shuffled.slice(0, count).map(o => o.id);
+        }
+      } else {
+        // Single select (excluding custom option for pristine prompts)
+        const filteredOptions = stdOptions.filter(o => o.id !== "custom");
+        if (filteredOptions.length > 0) {
+          const randOpt = filteredOptions[Math.floor(Math.random() * filteredOptions.length)];
+          newSelections[item.id] = randOpt.id;
+        }
+      }
+    });
+
+    setSelections(newSelections);
+    setCustomTexts(newCustomTexts);
   };
 
   // Check if user has made any selections or entered custom text
@@ -118,6 +262,7 @@ function App() {
         onSelectionChange={handleSelectionChange}
         onCustomTextChange={handleCustomTextChange}
         onReset={handleReset}
+        onRandomize={handleRandomize}
         activeTab={activeTab}
       />
       <RightPanel
@@ -137,7 +282,7 @@ function App() {
               : "text-zinc-400 hover:text-zinc-700"
           }`}
         >
-          Builder
+          {t("tabs.builder", "Builder")}
         </button>
         <button
           onClick={() => setActiveTab("preview")}
@@ -147,7 +292,7 @@ function App() {
               : "text-zinc-400 hover:text-zinc-700"
           }`}
         >
-          Preview
+          {t("tabs.preview", "Preview")}
           {hasSelections && (
             <span
               className={`w-2 h-2 rounded-full transition-all duration-300 ${

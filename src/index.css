@@ -12,3 +12,11 @@
     @apply antialiased bg-stone-50 text-zinc-900 m-0 p-0 overflow-hidden;
   }
 }
+
+@utility scrollbar-none {
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

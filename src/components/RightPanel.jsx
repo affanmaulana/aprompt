@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { assemblePrompt } from "../engine/promptEngine";
 import { promptSentenceConfig } from "../data/schema";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function RightPanel({ schema, selections, customTexts, activeTab }) {
+  const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
   const generatedPrompt = assemblePrompt(schema, selections, customTexts, promptSentenceConfig);
 
@@ -24,12 +26,29 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
       className={`w-full lg:w-[55%] h-full bg-white flex flex-col relative transition-all duration-300 border-l border-zinc-200/50 ${activeTab === "preview" ? "flex" : "hidden lg:flex"
         }`}
     >
+      {/* ==================================================================
+          MOBILE-ONLY HEADER BAR (Visual Coherence & Panel Branding)
+          ================================================================== */}
+      <div className="lg:hidden flex items-center justify-between px-6 py-4 bg-stone-50 border-b border-zinc-200/60 select-none z-20">
+        <div>
+          <h1 className="text-xl font-display font-extrabold tracking-tighter text-zinc-900 leading-none">
+            APROMPT
+          </h1>
+          <span className="text-[8px] font-sans font-bold uppercase tracking-widest text-zinc-400 block mt-1">
+            {t('brand.sub', 'ARCHITECTURAL')}
+          </span>
+        </div>
+        <div className="text-[9px] font-sans font-bold tracking-wider text-zinc-400 border border-zinc-200/80 bg-zinc-50/50 px-3 py-1.5 rounded-full uppercase">
+          {t('tabs.preview', 'Preview')}
+        </div>
+      </div>
+
       {/* Scrollable Prompt Viewport */}
       <div className="flex-1 px-8 py-12 lg:px-16 lg:py-20 overflow-y-auto flex flex-col max-w-4xl mx-auto w-full pb-36">
         <div className="my-auto w-full flex flex-col">
           <h2 className="text-[11px] font-sans font-bold uppercase tracking-[0.2em] text-zinc-400 mb-8 select-none flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
-            Final Generated Output
+            {t('output.title', 'Final Generated Output')}
           </h2>
 
           <div className="min-h-[200px] lg:min-h-[250px] mb-8">
@@ -39,15 +58,15 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
               </p>
             ) : (
               <p className="text-2xl sm:text-3xl lg:text-4xl font-display font-medium leading-[1.35] text-zinc-300 tracking-tight transition-all duration-300 select-none">
-                Your highly detailed architectural prompt will materialize here.
+                {t('output.empty', 'Your highly detailed architectural prompt will materialize here.')}
               </p>
             )}
           </div>
         </div>
       </div>
 
-      {/* Sticky Bottom Bar containing the Copy Button */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-10 bg-gradient-to-t from-white via-white/95 to-white/0 flex justify-center z-20 pointer-events-none select-none">
+      {/* Sticky Bottom Bar containing the Copy Button (pb-24 on mobile to lift it above the floating tab switcher) */}
+      <div className="absolute bottom-0 left-0 right-0 p-6 pb-24 lg:p-10 bg-gradient-to-t from-white via-white/95 to-white/0 flex justify-center z-20 pointer-events-none select-none">
         <div className="max-w-4xl w-full mx-auto flex justify-end pointer-events-auto">
           <button
             onClick={handleCopy}
@@ -62,12 +81,12 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
             {copied ? (
               <>
                 <Check className="w-5 h-5 mr-3" />
-                Copied to Clipboard
+                {t('action.copied', 'Copied to Clipboard')}
               </>
             ) : (
               <>
                 <Copy className="w-5 h-5 mr-3" />
-                Copy Prompt
+                {t('action.copy', 'Copy Prompt')}
               </>
             )}
           </button>
