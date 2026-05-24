@@ -90,12 +90,11 @@ export default function LeftPanel({
 
   return (
     <div
-      className={`w-full lg:w-[45%] h-full bg-stone-50 flex flex-col relative z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.04)] transition-all duration-300 ${
-        activeTab === "builder" ? "flex" : "hidden lg:flex"
-      }`}
+      className={`w-full lg:w-[45%] h-full bg-stone-50 flex flex-col relative z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.04)] transition-all duration-300 ${activeTab === "builder" ? "flex" : "hidden lg:flex"
+        }`}
     >
       <div className="flex-1 flex flex-row overflow-hidden">
-        
+
         {/* ==================================================================
             LEFT COLUMN: 30% Index Sidebar Navigation (Borderless Canvas)
             ================================================================== */}
@@ -122,19 +121,17 @@ export default function LeftPanel({
                     <button
                       key={group.id}
                       onClick={() => handleScrollToSection(group.id)}
-                      className={`flex items-center gap-2.5 text-left transition-all duration-200 group/nav relative cursor-pointer ${
-                        isActive
-                          ? "text-zinc-950 font-bold translate-x-1.5"
-                          : "text-zinc-400 hover:text-zinc-700 font-medium"
-                      }`}
+                      className={`flex items-center gap-2.5 text-left transition-all duration-200 group/nav relative cursor-pointer ${isActive
+                        ? "text-zinc-950 font-bold translate-x-1.5"
+                        : "text-zinc-400 hover:text-zinc-700 font-medium"
+                        }`}
                     >
                       {/* Active Indicator Bullet mapped to HSL group theme */}
                       {isActive && (
                         <span className={`absolute -left-3.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full ${theme.bulletColor} animate-pulse`} />
                       )}
-                      <GroupIcon className={`w-3.5 h-3.5 transition-all ${
-                        isActive ? theme.textAccent : "text-zinc-350 group-hover/nav:text-zinc-550"
-                      }`} />
+                      <GroupIcon className={`w-3.5 h-3.5 transition-all ${isActive ? theme.textAccent : "text-zinc-350 group-hover/nav:text-zinc-550"
+                        }`} />
                       <span className="text-xs font-sans tracking-wide">
                         {group.title}
                       </span>
@@ -208,7 +205,7 @@ export default function LeftPanel({
             })}
 
           {/* Spacer for bottom scrolling freedom */}
-          <div className="h-48 flex-shrink-0" />
+          <div className="h-12 flex-shrink-0" />
         </div>
 
       </div>

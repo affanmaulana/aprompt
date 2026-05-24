@@ -19,6 +19,15 @@ export default function ModuleInput({
     if (item.id === 'arch_style') {
       return "Elaborate on the architectural style (e.g., Minimalist Japandi blend with organic curves)...";
     }
+    if (item.id === 'composition') {
+      return "Add custom composition keywords (e.g., golden ratio, rule of thirds, dramatic asymmetry)...";
+    }
+    if (item.id === 'vehicle') {
+      return "Add custom vehicles or transportation details (e.g., vintage bicycle, sleek dark sports car)...";
+    }
+    if (item.id === 'human_activity') {
+      return "Add specific actions or human activities (e.g., reading a book under a tree, drinking coffee)...";
+    }
     if (item.allowDetailInput) {
       return `Add custom details for ${item.title.toLowerCase()} (e.g., specify angles, lighting accents, or specific placements)...`;
     }

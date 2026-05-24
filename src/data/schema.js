@@ -116,6 +116,7 @@ export const promptSchema = [
     enabled: true,
     expandable: true,
     semanticPart: 'composition',
+    type: 'multi-select',
     options: [
       { id: 'negative_space', label: 'Negative Space', value: 'Negative Space' },
       { id: 'dominant_sky_ratio', label: 'Dominant Sky Ratio', value: 'Dominant Sky Ratio' },
@@ -284,6 +285,7 @@ export const promptSchema = [
     enabled: true,
     expandable: true,
     semanticPart: 'narrative',
+    type: 'multi-select',
     options: [
       { id: 'luxury_sedans', label: 'Luxury Sedans', value: 'Luxury Sedans' },
       { id: 'family_suvs', label: 'Family SUVs', value: 'Family SUVs' },
@@ -324,6 +326,7 @@ export const promptSchema = [
     enabled: true,
     expandable: true,
     semanticPart: 'narrative',
+    type: 'multi-select',
     options: [
       { id: 'casual_walking', label: 'Casual Walking', value: 'Casual Walking' },
       { id: 'cycling', label: 'Cycling', value: 'Cycling' },
@@ -384,7 +387,7 @@ export const promptSchema = [
 
 export const carriageGroups = [
   { id: 'essentials', title: 'Essentials', icon: 'Sparkles', order: 1 },
-  { id: 'camera', title: 'Camera & Framing', icon: 'Camera', order: 2 },
+  { id: 'camera', title: 'Camera', icon: 'Camera', order: 2 },
   { id: 'environment', title: 'Environment', icon: 'Sun', order: 3 },
   { id: 'narrative', title: 'Narrative & Context', icon: 'Users', order: 4 },
 ];

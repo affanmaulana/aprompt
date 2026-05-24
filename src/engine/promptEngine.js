@@ -66,30 +66,36 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
     const hasCustomText = customText.trim().length > 0;
     if (!hasSelection && !hasCustomText) return;
 
-    // Special Case B: Materiality Multi-select + Custom text
-    if (item.id === 'material') {
+    // Generic Multi-select compilation (e.g. material, vehicle, composition, human_activity)
+    if (item.type === 'multi-select') {
       const selectedIds = Array.isArray(selection) ? selection : [];
-      const materialParts = [];
+      const parts = [];
 
-      // Collect standard options
       selectedIds.forEach((id) => {
         const opt = item.options?.find(o => o.id === id);
         if (opt && opt.value) {
-          materialParts.push(opt.value);
+          parts.push(opt.value);
         }
       });
 
-      // Add custom manual input if present
       const cleanCustom = sanitizeValue(customText);
       if (cleanCustom) {
-        materialParts.push(cleanCustom);
+        parts.push(cleanCustom);
       }
 
-      if (materialParts.length > 0) {
-        const materialList = formatList(materialParts);
-        resolvedValues['material'] = {
-          value: `featuring high-fidelity representation of ${materialList} materiality`,
-          semanticPart: 'material'
+      if (parts.length > 0) {
+        const listText = formatList(parts);
+        const template = item.template || '[VALUE]';
+        let resolvedTemplate = template.replace('[VALUE]', listText).trim();
+        
+        // Keep legacy special materiality formatting for backward compatibility
+        if (item.id === 'material') {
+          resolvedTemplate = `featuring high-fidelity representation of ${listText} materiality`;
+        }
+
+        resolvedValues[item.id] = {
+          value: resolvedTemplate,
+          semanticPart: item.semanticPart || 'subject'
         };
       }
       return;

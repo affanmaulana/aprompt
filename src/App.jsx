@@ -51,8 +51,11 @@ function App() {
         };
       }
       
-      // 2. Handle Material Multi-Select Array Toggle
-      if (carriageId === 'material') {
+      // 2. Handle Multi-Select Array Toggle (e.g. material, vehicle, etc.)
+      const schemaItem = promptSchema.find(s => s.id === carriageId);
+      const isMultiSelect = schemaItem && schemaItem.type === 'multi-select';
+      
+      if (isMultiSelect) {
         const currentArray = Array.isArray(prevVal) ? prevVal : [];
         if (currentArray.includes(optionId)) {
           return {
