@@ -27,13 +27,14 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
       {/* Scrollable Prompt Viewport */}
       <div className="flex-1 px-8 py-12 lg:px-16 lg:py-20 overflow-y-auto flex flex-col max-w-4xl mx-auto w-full pb-36">
         <div className="my-auto w-full flex flex-col">
-          <h2 className="text-[11px] font-sans font-bold uppercase tracking-[0.2em] text-zinc-400 mb-8 select-none">
+          <h2 className="text-[11px] font-sans font-bold uppercase tracking-[0.2em] text-zinc-400 mb-8 select-none flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
             Final Generated Output
           </h2>
 
           <div className="min-h-[200px] lg:min-h-[250px] mb-8">
             {generatedPrompt ? (
-              <p className="text-2xl sm:text-3xl lg:text-4xl font-display font-medium leading-[1.35] text-zinc-900 tracking-tight transition-all duration-300 selection:bg-zinc-800 selection:text-white">
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-display font-medium leading-[1.35] text-zinc-900 tracking-tight transition-all duration-300 selection:bg-accent selection:text-white">
                 {generatedPrompt}
               </p>
             ) : (
@@ -54,7 +55,7 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
             className={`flex items-center justify-center w-full sm:w-auto px-10 py-4 rounded-xl text-sm font-sans font-bold transition-all duration-300 cursor-pointer shadow-lg ${!generatedPrompt
               ? "bg-zinc-100 text-zinc-400 cursor-not-allowed shadow-none"
               : copied
-                ? "bg-zinc-900 text-white shadow-xl shadow-zinc-900/20 scale-[0.98]"
+                ? "bg-accent text-white shadow-xl shadow-accent/20 scale-[0.98]"
                 : "bg-black text-white hover:bg-zinc-800 hover:shadow-2xl hover:shadow-black/15 hover:-translate-y-0.5"
               }`}
           >

@@ -4,6 +4,7 @@
 @theme {
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Outfit', system-ui, sans-serif;
+  --color-accent: #D27D5B; /* Architectural clay terracotta */
 }
 
 @layer base {

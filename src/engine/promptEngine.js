@@ -139,6 +139,19 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
     };
   }
 
+  // 3.5. INJECT IMPLICIT COMPOSITION / FRAMING DEFAULT DIRECTIVE
+  const userComposition = resolvedValues['composition']?.value || '';
+  const framingDirective = 'utilizing soft, out-of-focus framing elements (such as clean architectural silhouettes, subtle structural borders, or distant organic elements) positioned strictly in the extreme corners of the frame, ensuring the main facade remains 100% unobstructed, sharp, and clear';
+  
+  if (userComposition) {
+    resolvedValues['composition'].value = `${userComposition}, while ${framingDirective}`;
+  } else {
+    resolvedValues['composition'] = {
+      value: framingDirective,
+      semanticPart: 'composition'
+    };
+  }
+
   // 4. INJECT IMPLICIT MATERIAL QUALITY DEFAULT DIRECTIVE
   // If the user selected materials, append glass reflection context to enrich details
   if (resolvedValues['material']) {
