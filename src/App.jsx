@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { useLocalStorage } from "./hooks/useLocalStorage";
 import { promptSchema } from "./data/schema";
 import LeftPanel from "./components/LeftPanel";
@@ -153,6 +154,7 @@ function App() {
           )}
         </button>
       </div>
+      <Analytics />
     </div>
   );
 }
