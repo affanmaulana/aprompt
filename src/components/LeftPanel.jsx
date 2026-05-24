@@ -97,16 +97,16 @@ export default function LeftPanel({
 
   return (
     <div
-      className={`w-full lg:w-[45%] h-full bg-stone-50 border-r border-zinc-200 flex flex-col relative z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.04)] transition-all duration-300 ${
+      className={`w-full lg:w-[45%] h-full bg-stone-50 flex flex-col relative z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.04)] transition-all duration-300 ${
         activeTab === "builder" ? "flex" : "hidden lg:flex"
       }`}
     >
       <div className="flex-1 flex flex-row overflow-hidden">
         
         {/* ==================================================================
-            LEFT COLUMN: 30% Index Sidebar Navigation
+            LEFT COLUMN: 30% Index Sidebar Navigation (Borderless Canvas)
             ================================================================== */}
-        <div className="w-[32%] border-r border-zinc-150 py-8 pl-8 pr-3 flex flex-col justify-between flex-shrink-0 bg-stone-50/70 select-none">
+        <div className="w-[32%] py-8 pl-8 pr-3 flex flex-col justify-between flex-shrink-0 bg-stone-50/70 select-none">
           <div>
             <div className="mb-10">
               <h1 className="text-2xl font-display font-extrabold tracking-tighter text-zinc-900 leading-none">
@@ -164,7 +164,7 @@ export default function LeftPanel({
         </div>
 
         {/* ==================================================================
-            RIGHT COLUMN: 70% Scrollable Content Area (HSL group backdrops)
+            RIGHT COLUMN: 70% Scrollable Content Area (Tighter spacing)
             ================================================================== */}
         <div
           id="specifications-scroll-container"
@@ -182,16 +182,13 @@ export default function LeftPanel({
                 <div
                   key={group.id}
                   id={`section-${group.id}`}
-                  className={`mb-8 p-6 rounded-2xl border ${theme.bg} ${theme.border} transition-all duration-300 shadow-[0_1px_3px_rgba(0,0,0,0.015)]`}
+                  className={`mb-5 p-6 rounded-2xl border ${theme.bg} ${theme.border} transition-all duration-300 shadow-[0_1px_3px_rgba(0,0,0,0.015)]`}
                 >
-                  {/* Elegant Section Title */}
+                  {/* Elegant Section Title (No parameter count label) */}
                   <div className="mb-4 flex items-center justify-between border-b border-zinc-200/50 pb-2">
                     <h2 className={`text-xs font-display font-extrabold ${theme.textAccent} tracking-widest uppercase`}>
                       {group.title}
                     </h2>
-                    <span className="text-[9px] font-sans font-bold text-zinc-400 bg-white/60 py-0.5 px-2 rounded-full border border-zinc-150">
-                      {groupCarriages.length} params
-                    </span>
                   </div>
 
                   {/* Render modules within group */}
@@ -199,7 +196,6 @@ export default function LeftPanel({
                     {groupCarriages
                       .sort((a, b) => a.order - b.order)
                       .map((item) => {
-                        // Calculate global sequential index for clean numerical indexing
                         const globalIndex = schema.findIndex(s => s.id === item.id) + 1;
                         return (
                           <ModuleInput

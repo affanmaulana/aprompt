@@ -57,30 +57,12 @@ export const promptSchema = [
       { id: 'neo_futurism', label: 'Neo Futurism', value: 'Neo Futurism' },
     ],
   },
-
-  // ========================================================================
-  // GROUP: project — Architecture
-  // ========================================================================
-  {
-    id: 'geometry',
-    title: 'Preserve Original Facade & Massing',
-    category: 'project',
-    group: 'project',
-    order: 3,
-    priority: 'optional',
-    template: 'with instruction to [VALUE]',
-    enabled: true,
-    expandable: true,
-    semanticPart: 'geometry',
-    type: 'toggle',
-    options: [],
-  },
   {
     id: 'material',
     title: 'Materiality & Finishes',
     category: 'project',
-    group: 'project',
-    order: 4,
+    group: 'essentials',
+    order: 3,
     priority: 'required',
     template: 'featuring [VALUE]',
     enabled: true,

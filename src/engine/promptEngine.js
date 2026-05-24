@@ -50,6 +50,12 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
     semanticPart: 'task'
   };
 
+  // Implicit Geometry Preservation (Always Yes)
+  resolvedValues['geometry'] = {
+    value: 'with instruction to preserve existing structural massing, facade geometry, and original roofline',
+    semanticPart: 'geometry'
+  };
+
   // 2. PROCESS USER-CONFIGURED SPECIFICATIONS
   schema.forEach((item) => {
     const selection = selections?.[item.id];
@@ -59,17 +65,6 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
     const hasSelection = selection !== undefined && selection !== null && selection !== '';
     const hasCustomText = customText.trim().length > 0;
     if (!hasSelection && !hasCustomText) return;
-
-    // Special Case A: Geometry Toggle
-    if (item.id === 'geometry') {
-      if (selection === true) {
-        resolvedValues['geometry'] = {
-          value: 'with instruction to preserve existing structural massing, facade geometry, and original roofline',
-          semanticPart: 'geometry'
-        };
-      }
-      return;
-    }
 
     // Special Case B: Materiality Multi-select + Custom text
     if (item.id === 'material') {
@@ -175,7 +170,7 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
       }
     });
 
-    // Also include implicit values that don't map directly to schema keys but are in resolvedValues (e.g. role, task, output)
+    // Also include implicit values that don't map directly to schema keys but are in resolvedValues (e.g. role, task, output, geometry)
     sentenceDef.parts.forEach(part => {
       Object.keys(resolvedValues).forEach(key => {
         const isImplicit = !schema.some(s => s.id === key);
