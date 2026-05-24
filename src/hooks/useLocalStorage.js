@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export function useLocalStorage(key, initialValue) {
   // Pass initial state function to useState so logic is only executed once

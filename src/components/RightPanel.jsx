@@ -1,57 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Copy, Check } from "lucide-react";
+import { assemblePrompt } from "../engine/promptEngine";
+import { promptSentenceConfig } from "../data/schema";
 
 export default function RightPanel({ schema, selections, customTexts, activeTab }) {
   const [copied, setCopied] = useState(false);
-  const [generatedPrompt, setGeneratedPrompt] = useState("");
-
-  useEffect(() => {
-    // Generate Prompt Logic
-    let promptParts = [];
-
-    schema.forEach((item) => {
-      const selectedId = selections[item.id];
-      if (!selectedId) return; // Skip if no selection
-
-      let valueToInject = "";
-
-      if (selectedId === "custom") {
-        const rawText = customTexts[item.id] || "";
-        if (!rawText.trim()) return; // Skip if custom text is empty
-        
-        // Clean up trailing punctuation (.,;) and double spaces
-        valueToInject = rawText.trim().replace(/[.,;]+$/, "").replace(/\s+/g, " ");
-      } else {
-        const option = item.options.find(opt => opt.id === selectedId);
-        if (option) {
-          valueToInject = option.value;
-        }
-      }
-
-      if (valueToInject) {
-        // Replace [VALUE] in template
-        const resolvedTemplate = item.template.replace("[VALUE]", valueToInject);
-        promptParts.push(resolvedTemplate);
-      }
-    });
-
-    // Join all parts with a single space, clean up any double spaces, and trim
-    let finalPrompt = promptParts.join(" ").replace(/\s+/g, " ").trim();
-    
-    // Capitalize first letter and ensure it ends with a period if there is text
-    if (finalPrompt) {
-        finalPrompt = finalPrompt.charAt(0).toUpperCase() + finalPrompt.slice(1);
-        if (!finalPrompt.endsWith(".")) {
-            finalPrompt += ".";
-        }
-    }
-    
-    setGeneratedPrompt(finalPrompt);
-  }, [schema, selections, customTexts]);
+  // Derive prompt directly to avoid cascading renders (Lint Rule: react-hooks/set-state-in-effect)
+  const generatedPrompt = assemblePrompt(schema, selections, customTexts, promptSentenceConfig);
 
   const handleCopy = async () => {
     if (!generatedPrompt) return;
-    
+
     try {
       await navigator.clipboard.writeText(generatedPrompt);
       setCopied(true);
@@ -73,14 +32,14 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
           <h2 className="text-[11px] font-sans font-bold uppercase tracking-[0.2em] text-zinc-400 mb-8 select-none">
             Final Generated Output
           </h2>
-          
+
           <div className="min-h-[200px] lg:min-h-[250px] mb-12">
             {generatedPrompt ? (
-              <p className="text-2xl sm:text-3xl lg:text-4xl font-display font-medium leading-[1.3] text-zinc-900 tracking-tight transition-all duration-300">
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-display font-medium leading-[1.3] text-zinc-900 tracking-tight transition-all duration-300 selection:bg-zinc-800 selection:text-white">
                 {generatedPrompt}
               </p>
             ) : (
-              <p className="text-2xl sm:text-3xl lg:text-4xl font-display font-medium leading-[1.3] text-zinc-300 tracking-tight transition-all duration-300">
+              <p className="text-2xl sm:text-3xl lg:text-4xl font-display font-medium leading-[1.3] text-zinc-300 tracking-tight transition-all duration-300 select-none">
                 Your highly detailed architectural prompt will materialize here.
               </p>
             )}
@@ -90,9 +49,9 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
             <button
               onClick={handleCopy}
               disabled={!generatedPrompt}
-              className={`flex items-center justify-center w-full sm:w-auto px-10 py-4 rounded-xl text-sm font-sans font-bold transition-all duration-300 ${
+              className={`flex items-center justify-center w-full sm:w-auto px-10 py-4 rounded-xl text-sm font-sans font-bold transition-all duration-300 cursor-pointer ${
                 !generatedPrompt
-                  ? "bg-zinc-100 text-zinc-400 cursor-not-allowed"
+                  ? "bg-zinc-100 text-zinc-400 cursor-not-allowed shadow-none"
                   : copied
                   ? "bg-zinc-900 text-white shadow-xl shadow-zinc-900/20 scale-[0.98]"
                   : "bg-black text-white hover:bg-zinc-800 hover:shadow-2xl hover:shadow-black/15 hover:-translate-y-1"
