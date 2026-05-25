@@ -87,80 +87,42 @@ export default function RightPanel({
             )}
           </div>
 
-          {/* ==================================================================
-              MOBILE-ONLY UTILITIES & COPY ACTION (Clean bottom grouping)
-              ================================================================== */}
-          <div className="lg:hidden mt-8 flex flex-col gap-4">
-            <div className="flex items-center gap-3">
-              {/* Randomize */}
-              <button
-                onClick={onRandomize}
-                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-accent text-white font-sans font-bold text-xs active:scale-95 transition-all cursor-pointer shadow-sm shadow-accent/10"
-              >
-                <Shuffle className="w-3.5 h-3.5" />
-                {t('action.randomize', 'Randomize')}
-              </button>
-
-              {/* Reset */}
-              <button
-                onClick={onReset}
-                title={t('action.reset', 'Reset configuration')}
-                className="flex items-center justify-center p-3 rounded-xl border border-zinc-200 text-zinc-450 active:scale-95 transition-all cursor-pointer bg-white"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-
-              {/* Language Switcher */}
-              <div className="flex items-center bg-zinc-200/50 p-0.5 h-10 rounded-xl shadow-inner select-none">
-                <button
-                  onClick={() => setLanguage("en")}
-                  className={`px-3 h-full rounded-lg text-[10px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${
-                    language === "en"
-                      ? "bg-white text-zinc-950 shadow-sm"
-                      : "text-zinc-400 hover:text-zinc-650"
-                  }`}
-                >
-                  EN
-                </button>
-                <button
-                  onClick={() => setLanguage("id")}
-                  className={`px-3 h-full rounded-lg text-[10px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${
-                    language === "id"
-                      ? "bg-white text-zinc-950 shadow-sm"
-                      : "text-zinc-400 hover:text-zinc-650"
-                  }`}
-                >
-                  ID
-                </button>
-              </div>
-            </div>
-
-            {/* Copy button */}
-            {generatedPrompt && (
-              <button
-                onClick={handleCopy}
-                className={`flex items-center justify-center w-full px-8 py-4 rounded-xl text-sm font-sans font-bold transition-all duration-300 cursor-pointer shadow-lg active:scale-95 ${
-                  copied
-                    ? "bg-accent text-white shadow-xl shadow-accent/20"
-                    : "bg-black text-white"
-                }`}
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-5 h-5 mr-3" />
-                    {t('action.copied', 'Copied to Clipboard')}
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-5 h-5 mr-3" />
-                    {t('action.copy', 'Copy Prompt')}
-                  </>
-                )}
-              </button>
-            )}
-          </div>
         </div>
       </div>
+
+      {/* ==================================================================
+          MOBILE-ONLY STICKY COPY CONTROL (Positioned perfectly above tab switcher)
+          ================================================================== */}
+      {generatedPrompt && (
+        <div className={`lg:hidden fixed bottom-[90px] left-0 right-0 px-6 py-4 z-40 bg-gradient-to-t ${
+          activeCategory === 'interior'
+            ? 'from-[#FBF9F5] via-[#FBF9F5]/90'
+            : activeCategory === 'cityscape'
+              ? 'from-[#F5F7FA] via-[#F5F7FA]/90'
+              : 'from-[#FCFDFB] via-[#FCFDFB]/90'
+        } to-transparent pointer-events-none`}>
+          <button
+            onClick={handleCopy}
+            className={`pointer-events-auto flex items-center justify-center w-full py-4 rounded-xl text-sm font-sans font-bold transition-all duration-300 cursor-pointer shadow-xl active:scale-95 ${
+              copied
+                ? "bg-accent text-white shadow-2xl shadow-accent/20 scale-[0.98]"
+                : "bg-black text-white hover:bg-zinc-800"
+            }`}
+          >
+            {copied ? (
+              <>
+                <Check className="w-5 h-5 mr-3" />
+                {t('action.copied', 'Copied to Clipboard')}
+              </>
+            ) : (
+              <>
+                <Copy className="w-5 h-5 mr-3" />
+                {t('action.copy', 'Copy Prompt')}
+              </>
+            )}
+          </button>
+        </div>
+      )}
 
       {/* ==================================================================
           DESKTOP-ONLY STICKY COMMAND CENTER (Command bar opposite layout)
