@@ -94,7 +94,7 @@ export default function RightPanel({
           MOBILE-ONLY STICKY COPY CONTROL (Positioned perfectly above tab switcher)
           ================================================================== */}
       {generatedPrompt && (
-        <div className="lg:hidden fixed bottom-[90px] left-0 right-0 px-6 py-4 z-40 bg-transparent pointer-events-none">
+        <div className="lg:hidden fixed bottom-[76px] left-0 right-0 px-6 py-4 z-40 bg-transparent pointer-events-none">
           <button
             onClick={handleCopy}
             className={`pointer-events-auto flex items-center justify-center w-full py-4 rounded-xl text-sm font-sans font-bold transition-all duration-300 cursor-pointer shadow-xl active:scale-95 ${

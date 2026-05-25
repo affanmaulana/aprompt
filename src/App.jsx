@@ -282,7 +282,7 @@ function App() {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row w-full h-screen bg-white overflow-hidden font-sans antialiased selection:bg-zinc-200 selection:text-zinc-900 relative">
+    <div className="flex flex-col lg:flex-row w-full h-dvh bg-white overflow-hidden font-sans antialiased selection:bg-zinc-200 selection:text-zinc-900 relative">
       <LeftPanel
         schema={activeSchema}
         selections={selections}
@@ -306,12 +306,14 @@ function App() {
       />
 
       {/* Floating Segmented Control for Mobile Viewport */}
-      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/95 backdrop-blur-md border border-zinc-200/80 p-1 rounded-full shadow-2xl flex w-[85%] max-w-[280px] h-[48px] relative transition-all duration-300 select-none">
-        {/* Sliding Active Pill */}
+      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/95 backdrop-blur-md border border-zinc-200/80 p-1 rounded-full shadow-2xl flex w-[85%] max-w-[280px] h-[48px] transition-all duration-300 select-none">
+        {/* Sliding Active Pill (Symmetric inline positioning) */}
         <div
-          className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-black rounded-full transition-transform duration-300 ease-out z-0 ${
-            activeTab === "preview" ? "translate-x-full" : "translate-x-0"
-          }`}
+          className="absolute top-1 bottom-1 bg-black rounded-full transition-all duration-300 ease-out z-0"
+          style={{
+            left: activeTab === "preview" ? "calc(50% + 2px)" : "4px",
+            width: "calc(50% - 6px)"
+          }}
         />
 
         <button
