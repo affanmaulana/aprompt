@@ -306,29 +306,32 @@ function App() {
       />
 
       {/* Floating Segmented Control for Mobile Viewport */}
-      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/95 backdrop-blur-md border border-zinc-200/80 p-1.5 rounded-full shadow-2xl flex items-center gap-1.5 w-[85%] max-w-[280px] transition-all duration-300">
+      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/95 backdrop-blur-md border border-zinc-200/80 p-1 rounded-full shadow-2xl flex items-center w-[85%] max-w-[280px] h-[48px] relative transition-all duration-300 select-none">
+        {/* Sliding Active Pill */}
+        <div
+          className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-black rounded-full transition-transform duration-300 ease-out z-0 ${
+            activeTab === "preview" ? "translate-x-full" : "translate-x-0"
+          }`}
+        />
+
         <button
           onClick={() => setActiveTab("builder")}
-          className={`flex-1 py-2.5 rounded-full text-xs font-display font-bold tracking-wider uppercase transition-all duration-200 ${
-            activeTab === "builder"
-              ? "bg-black text-white shadow-md"
-              : "text-zinc-400 hover:text-zinc-700"
+          className={`flex-1 h-full rounded-full text-xs font-display font-bold tracking-wider uppercase transition-colors duration-300 z-10 cursor-pointer ${
+            activeTab === "builder" ? "text-white" : "text-zinc-400"
           }`}
         >
           {t("tabs.builder", "Builder")}
         </button>
         <button
           onClick={() => setActiveTab("preview")}
-          className={`flex-1 py-2.5 rounded-full text-xs font-display font-bold tracking-wider uppercase transition-all duration-200 flex items-center justify-center gap-2 ${
-            activeTab === "preview"
-              ? "bg-black text-white shadow-md"
-              : "text-zinc-400 hover:text-zinc-700"
+          className={`flex-1 h-full rounded-full text-xs font-display font-bold tracking-wider uppercase transition-colors duration-300 z-10 flex items-center justify-center gap-2 cursor-pointer ${
+            activeTab === "preview" ? "text-white" : "text-zinc-400"
           }`}
         >
           {t("tabs.preview", "Preview")}
           {hasSelections && (
             <span
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+              className={`w-2 h-2 rounded-full transition-colors duration-300 ${
                 activeTab === "preview" ? "bg-white" : "bg-black animate-pulse"
               }`}
             />
