@@ -306,17 +306,17 @@ function App() {
       />
 
       {/* Floating Segmented Control for Mobile Viewport */}
-      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/95 backdrop-blur-md border border-zinc-200/80 p-1 rounded-full shadow-2xl flex items-center w-[85%] max-w-[280px] h-[48px] relative transition-all duration-300 select-none">
+      <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-white/95 backdrop-blur-md border border-zinc-200/80 p-1 rounded-full shadow-2xl flex w-[85%] max-w-[280px] h-[48px] relative transition-all duration-300 select-none">
         {/* Sliding Active Pill */}
         <div
-          className={`absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-black rounded-full transition-transform duration-300 ease-out z-0 ${
-            activeTab === "preview" ? "translate-x-full" : "translate-x-0"
+          className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-black rounded-full transition-all duration-300 ease-out z-0 ${
+            activeTab === "preview" ? "left-[50%]" : "left-1"
           }`}
         />
 
         <button
           onClick={() => setActiveTab("builder")}
-          className={`flex-1 h-full rounded-full text-xs font-display font-bold tracking-wider uppercase transition-colors duration-300 z-10 cursor-pointer ${
+          className={`flex-1 h-full flex items-center justify-center rounded-full text-xs font-display font-bold tracking-wider uppercase transition-colors duration-300 z-10 cursor-pointer ${
             activeTab === "builder" ? "text-white" : "text-zinc-400"
           }`}
         >
@@ -324,7 +324,7 @@ function App() {
         </button>
         <button
           onClick={() => setActiveTab("preview")}
-          className={`flex-1 h-full rounded-full text-xs font-display font-bold tracking-wider uppercase transition-colors duration-300 z-10 flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 h-full flex items-center justify-center gap-2 rounded-full text-xs font-display font-bold tracking-wider uppercase transition-colors duration-300 z-10 cursor-pointer ${
             activeTab === "preview" ? "text-white" : "text-zinc-400"
           }`}
         >
