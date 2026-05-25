@@ -125,7 +125,7 @@ export default function LeftPanel({
             APROMPT
           </h1>
           <span className="text-[8px] font-sans font-bold uppercase tracking-widest text-zinc-400 block mt-1">
-            {t('brand.sub', 'ARCHITECTURAL')}
+            {t('brand.sub', 'ARCHITECT PROMPT BUILDER')}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -151,21 +151,19 @@ export default function LeftPanel({
           <div className="flex items-center bg-zinc-200/50 p-0.5 h-9 rounded-xl shadow-inner select-none">
             <button
               onClick={() => setLanguage("en")}
-              className={`px-2.5 h-full rounded-lg text-[9px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${
-                language === "en"
-                  ? "bg-white text-zinc-950 shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-650"
-              }`}
+              className={`px-2.5 h-full rounded-lg text-[9px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${language === "en"
+                ? "bg-white text-zinc-950 shadow-sm"
+                : "text-zinc-400 hover:text-zinc-650"
+                }`}
             >
               EN
             </button>
             <button
               onClick={() => setLanguage("id")}
-              className={`px-2.5 h-full rounded-lg text-[9px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${
-                language === "id"
-                  ? "bg-white text-zinc-950 shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-650"
-              }`}
+              className={`px-2.5 h-full rounded-lg text-[9px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${language === "id"
+                ? "bg-white text-zinc-950 shadow-sm"
+                : "text-zinc-400 hover:text-zinc-650"
+                }`}
             >
               ID
             </button>
@@ -185,11 +183,10 @@ export default function LeftPanel({
               <button
                 key={cat.id}
                 onClick={() => setActiveCategory(cat.id)}
-                className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-lg text-[9px] font-sans font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
-                  isCatActive
-                    ? "bg-white text-zinc-950 shadow-sm"
-                    : "text-zinc-400 hover:text-zinc-650"
-                }`}
+                className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-lg text-[9px] font-sans font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer ${isCatActive
+                  ? "bg-white text-zinc-950 shadow-sm"
+                  : "text-zinc-400 hover:text-zinc-650"
+                  }`}
               >
                 <CatIcon className="w-3.5 h-3.5 font-bold" />
                 <span>{t('tabs.' + cat.id, cat.title)}</span>
@@ -213,11 +210,10 @@ export default function LeftPanel({
               <button
                 key={group.id}
                 onClick={() => handleScrollToSection(group.id)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition-all duration-200 cursor-pointer flex-shrink-0 text-xs font-medium ${
-                  isActive
-                    ? `${theme.bg} ${theme.textAccent} ${theme.border} font-bold shadow-sm`
-                    : "bg-stone-50/50 text-zinc-400 border-transparent hover:text-zinc-600 hover:bg-stone-100"
-                }`}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full border transition-all duration-200 cursor-pointer flex-shrink-0 text-xs font-medium ${isActive
+                  ? `${theme.bg} ${theme.textAccent} ${theme.border} font-bold shadow-sm`
+                  : "bg-stone-50/50 text-zinc-400 border-transparent hover:text-zinc-600 hover:bg-stone-100"
+                  }`}
               >
                 <GroupIcon className="w-3.5 h-3.5" />
                 <span>{t('group.' + group.id, group.title)}</span>
@@ -251,11 +247,10 @@ export default function LeftPanel({
                   <button
                     key={cat.id}
                     onClick={() => setActiveCategory(cat.id)}
-                    className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-[9px] font-sans font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
-                      isCatActive
-                        ? "bg-white text-zinc-950 shadow-sm"
-                        : "text-zinc-400 hover:text-zinc-700"
-                    }`}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-[9px] font-sans font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer ${isCatActive
+                      ? "bg-white text-zinc-950 shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-700"
+                      }`}
                   >
                     <CatIcon className="w-3.5 h-3.5" />
                     <span>{t('tabs.' + cat.id, cat.title)}</span>
@@ -295,7 +290,7 @@ export default function LeftPanel({
                 })}
             </nav>
           </div>
-          </div>
+        </div>
 
         {/* ==================================================================
             RIGHT COLUMN: 70% Scrollable Content Area (Tighter spacing - FULL WIDTH ON MOBILE)
