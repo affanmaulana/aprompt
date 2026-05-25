@@ -6,11 +6,29 @@ import LeftPanel from "./components/LeftPanel";
 import RightPanel from "./components/RightPanel";
 import { useLanguage } from "./context/LanguageContext";
 
+// Pure random utility helpers defined outside the component to satisfy React 19 linter rules
+function selectRandomOption(options) {
+  if (!options || options.length === 0) return null;
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+function getRandomValue() {
+  return Math.random();
+}
+
+function getShuffledOptions(options) {
+  return [...options].sort(() => 0.5 - Math.random());
+}
+
 function App() {
+  const [activeCategory, setActiveCategory] = useLocalStorage("aprompt_category", "exterior");
   const [selections, setSelections] = useLocalStorage("aprompt_selections", {});
   const [customTexts, setCustomTexts] = useLocalStorage("aprompt_customTexts", {});
   const [activeTab, setActiveTab] = useState("builder"); // builder | preview
   const { t } = useLanguage();
+
+  // Filter schema dynamically based on selected render category
+  const activeSchema = promptSchema.filter(item => !item.categories || item.categories.includes(activeCategory));
 
   // Strict Mount Cleanup: Keep only active keys from the new schema
   useEffect(() => {
@@ -150,44 +168,52 @@ function App() {
   };
 
   const handleRandomize = () => {
-    const newSelections = {};
-    const newCustomTexts = {};
+    const newSelections = { ...selections };
+    const newCustomTexts = { ...customTexts };
+
+    // Clear selections and custom text only for active carriages to keep others intact
+    activeSchema.forEach(item => {
+      delete newSelections[item.id];
+      delete newCustomTexts[item.id];
+    });
 
     // 1. Decide human presence randomly to handle activities and motion clashes safely
-    const humanPresenceItem = promptSchema.find(s => s.id === "human_presence");
+    const humanPresenceItem = activeSchema.find(s => s.id === "human_presence");
     let chosenHumanPresence = null;
     if (humanPresenceItem) {
       const stdOptions = humanPresenceItem.options || [];
       if (stdOptions.length > 0) {
-        const randOpt = stdOptions[Math.floor(Math.random() * stdOptions.length)];
-        chosenHumanPresence = randOpt.id;
-        newSelections["human_presence"] = chosenHumanPresence;
+        const randOpt = selectRandomOption(stdOptions);
+        chosenHumanPresence = randOpt ? randOpt.id : null;
+        if (chosenHumanPresence) {
+          newSelections["human_presence"] = chosenHumanPresence;
+        }
       }
     }
 
     // 2. Decide vehicle presence randomly to handle motion clashes safely
-    const vehicleItem = promptSchema.find(s => s.id === "vehicle");
+    const vehicleItem = activeSchema.find(s => s.id === "vehicle");
     let isNoVehicles = false;
     if (vehicleItem) {
       const stdOptions = vehicleItem.options || [];
       if (stdOptions.length > 0) {
-        const randVal = Math.random();
+        const randVal = getRandomValue();
         if (randVal < 0.25) {
           newSelections["vehicle"] = ["no_vehicles"];
           isNoVehicles = true;
         } else {
           // Select 1 to 2 random vehicles (excluding no_vehicles and custom)
           const filteredOptions = stdOptions.filter(o => o.id !== "no_vehicles" && o.id !== "custom");
-          const shuffled = [...filteredOptions].sort(() => 0.5 - Math.random());
-          const count = Math.random() < 0.7 ? 1 : 2;
+          const shuffled = getShuffledOptions(filteredOptions);
+          const count = getRandomValue() < 0.7 ? 1 : 2;
           const chosen = shuffled.slice(0, count).map(o => o.id);
           newSelections["vehicle"] = chosen;
         }
       }
     }
 
-    // 3. Randomize other carriage options in the schema
-    promptSchema.forEach((item) => {
+    // 3. Randomize other carriage options in the active schema
+    activeSchema.forEach((item) => {
       if (item.id === "human_presence" || item.id === "vehicle") return;
 
       // Handle clash prevention for human_activity
@@ -207,21 +233,21 @@ function App() {
         }
         allowedOptions = allowedOptions.filter(o => o.id !== "custom");
 
-        if (allowedOptions.length > 0) {
-          const randOpt = allowedOptions[Math.floor(Math.random() * allowedOptions.length)];
+        const randOpt = selectRandomOption(allowedOptions);
+        if (randOpt) {
           newSelections["motion"] = randOpt.id;
         }
         return;
       }
 
-      // Standard multi-select items
+      // Standard options randomization
       const stdOptions = item.options || [];
       if (stdOptions.length === 0) return;
 
       if (item.type === "multi-select") {
         const filteredOptions = stdOptions.filter(o => o.id !== "custom");
-        const shuffled = [...filteredOptions].sort(() => 0.5 - Math.random());
-        const randVal = Math.random();
+        const shuffled = getShuffledOptions(filteredOptions);
+        const randVal = getRandomValue();
         let count = 1;
         if (randVal < 0.15) count = 0;
         else if (randVal > 0.75) count = 2;
@@ -232,8 +258,8 @@ function App() {
       } else {
         // Single select (excluding custom option for pristine prompts)
         const filteredOptions = stdOptions.filter(o => o.id !== "custom");
-        if (filteredOptions.length > 0) {
-          const randOpt = filteredOptions[Math.floor(Math.random() * filteredOptions.length)];
+        const randOpt = selectRandomOption(filteredOptions);
+        if (randOpt) {
           newSelections[item.id] = randOpt.id;
         }
       }
@@ -243,9 +269,11 @@ function App() {
     setCustomTexts(newCustomTexts);
   };
 
-  // Check if user has made any selections or entered custom text
+  // Check if user has made any selections or entered custom text in visible active carriages
   const hasSelections = Object.keys(selections).some(
     (key) => {
+      // Only consider keys that are visible in active category
+      if (!activeSchema.some(s => s.id === key)) return false;
       const val = selections[key];
       if (Array.isArray(val)) return val.length > 0;
       if (typeof val === 'boolean') return val === true;
@@ -256,7 +284,7 @@ function App() {
   return (
     <div className="flex flex-col lg:flex-row w-full h-screen bg-white overflow-hidden font-sans antialiased selection:bg-zinc-200 selection:text-zinc-900 relative">
       <LeftPanel
-        schema={promptSchema}
+        schema={activeSchema}
         selections={selections}
         customTexts={customTexts}
         onSelectionChange={handleSelectionChange}
@@ -264,12 +292,17 @@ function App() {
         onReset={handleReset}
         onRandomize={handleRandomize}
         activeTab={activeTab}
+        activeCategory={activeCategory}
+        setActiveCategory={setActiveCategory}
       />
       <RightPanel
-        schema={promptSchema}
+        schema={activeSchema}
         selections={selections}
         customTexts={customTexts}
         activeTab={activeTab}
+        activeCategory={activeCategory}
+        onReset={handleReset}
+        onRandomize={handleRandomize}
       />
 
       {/* Floating Segmented Control for Mobile Viewport */}

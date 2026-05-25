@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { RotateCcw, Sparkles, Camera, Sun, Users, Shuffle } from "lucide-react";
-import { carriageGroups } from "../data/schema";
+import { RotateCcw, Sparkles, Camera, Sun, Users, Shuffle, Home, Layout, Building2 } from "lucide-react";
+import { carriageGroups, renderCategories } from "../data/schema";
 import ModuleInput from "./ModuleInput";
 import { useLanguage } from "../context/LanguageContext";
 
@@ -9,6 +9,12 @@ const iconMap = {
   Camera: Camera,
   Sun: Sun,
   Users: Users
+};
+
+const categoryIconMap = {
+  exterior: Home,
+  interior: Layout,
+  cityscape: Building2
 };
 
 // sophisticated HSL off-white color mapping for sections
@@ -47,10 +53,24 @@ export default function LeftPanel({
   onCustomTextChange,
   onReset,
   onRandomize,
-  activeTab
+  activeTab,
+  activeCategory,
+  setActiveCategory
 }) {
   const [activeSection, setActiveSection] = useState("essentials");
   const { language, setLanguage, t } = useLanguage();
+
+  const leftPanelBg = activeCategory === 'interior'
+    ? 'bg-[#F6F4EE]'
+    : activeCategory === 'cityscape'
+      ? 'bg-[#EFF2F6]'
+      : 'bg-[#F9FAF6]';
+
+  const contentBg = activeCategory === 'interior'
+    ? 'bg-[#FBF9F5]'
+    : activeCategory === 'cityscape'
+      ? 'bg-[#F5F7FA]'
+      : 'bg-[#FCFDFB]';
 
   // Track active section on scroll using IntersectionObserver
   useEffect(() => {
@@ -93,13 +113,13 @@ export default function LeftPanel({
 
   return (
     <div
-      className={`w-full lg:w-[45%] h-full bg-stone-50 flex flex-col relative z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.04)] transition-all duration-300 ${activeTab === "builder" ? "flex" : "hidden lg:flex"
+      className={`w-full lg:w-[45%] h-full ${leftPanelBg} flex flex-col relative z-10 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.04)] transition-all duration-300 ${activeTab === "builder" ? "flex" : "hidden lg:flex"
         }`}
     >
       {/* ==================================================================
           MOBILE-ONLY HEADER BAR & UTILITIES (Elegant Space Optimization)
           ================================================================== */}
-      <div className="lg:hidden flex items-center justify-between px-6 py-4 bg-stone-50 border-b border-zinc-200/60 select-none z-20">
+      <div className="lg:hidden flex items-center justify-between px-6 py-4 bg-transparent border-b border-zinc-200/60 select-none z-20">
         <div>
           <h1 className="text-xl font-display font-extrabold tracking-tighter text-zinc-900 leading-none">
             APROMPT
@@ -154,6 +174,32 @@ export default function LeftPanel({
       </div>
 
       {/* ==================================================================
+          MOBILE-ONLY CATEGORY SWITCHER (Horizontal segment switcher)
+          ================================================================== */}
+      <div className="lg:hidden px-6 pt-4 pb-1 select-none">
+        <div className="flex bg-zinc-200/50 p-0.5 rounded-xl shadow-inner">
+          {renderCategories.map((cat) => {
+            const CatIcon = categoryIconMap[cat.id] || Sparkles;
+            const isCatActive = activeCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`flex-1 flex items-center justify-center gap-1 py-2.5 rounded-lg text-[9px] font-sans font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                  isCatActive
+                    ? "bg-white text-zinc-950 shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-650"
+                }`}
+              >
+                <CatIcon className="w-3.5 h-3.5 font-bold" />
+                <span>{t('tabs.' + cat.id, cat.title)}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ==================================================================
           MOBILE-ONLY HORIZONTAL SECTION TABS (Swipeable Navigation)
           ================================================================== */}
       <div className="lg:hidden sticky top-0 bg-white/95 backdrop-blur-md border-b border-zinc-200/50 z-20 px-6 py-3 flex items-center overflow-x-auto gap-2 scrollbar-none select-none">
@@ -185,15 +231,37 @@ export default function LeftPanel({
         {/* ==================================================================
             LEFT COLUMN: 30% Index Sidebar Navigation (Borderless Canvas - DESKTOP ONLY)
             ================================================================== */}
-        <div className="hidden lg:flex w-[32%] py-8 pl-8 pr-3 flex-col justify-between flex-shrink-0 bg-stone-50/70 select-none">
+        <div className="hidden lg:flex w-[32%] py-8 pl-8 pr-3 flex-col justify-between flex-shrink-0 bg-transparent select-none">
           <div>
-            <div className="mb-10">
+            <div className="mb-8">
               <h1 className="text-2xl font-display font-extrabold tracking-tighter text-zinc-900 leading-none">
                 APROMPT
               </h1>
               <span className="text-[9px] font-sans font-bold uppercase tracking-widest text-zinc-400 block mt-2">
                 {t('brand.sub', 'ARCHITECTURAL')}
               </span>
+            </div>
+
+            {/* Desktop Category Switcher */}
+            <div className="flex flex-col bg-zinc-200/50 p-0.5 rounded-xl mb-8 select-none">
+              {renderCategories.map((cat) => {
+                const CatIcon = categoryIconMap[cat.id] || Sparkles;
+                const isCatActive = activeCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-[9px] font-sans font-extrabold uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                      isCatActive
+                        ? "bg-white text-zinc-950 shadow-sm"
+                        : "text-zinc-400 hover:text-zinc-700"
+                    }`}
+                  >
+                    <CatIcon className="w-3.5 h-3.5" />
+                    <span>{t('tabs.' + cat.id, cat.title)}</span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Sidebar Anchor Links */}
@@ -227,61 +295,14 @@ export default function LeftPanel({
                 })}
             </nav>
           </div>
-
-          {/* Bottom Toolbar/Utility Area */}
-          <div className="flex flex-col gap-3">
-            {/* Randomize Button */}
-            <button
-              onClick={onRandomize}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-accent text-white font-sans font-bold text-xs hover:bg-accent/90 hover:shadow-md transition-all duration-200 cursor-pointer shadow-sm select-none"
-            >
-              <Shuffle className="w-3.5 h-3.5" />
-              {t('action.randomize', 'Randomize')}
-            </button>
-
-            {/* Reset and Language Switcher row */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={onReset}
-                title={t('action.reset', 'Reset configuration')}
-                className="flex items-center justify-center p-3 rounded-xl border border-zinc-200 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 hover:border-zinc-350 transition-all cursor-pointer shadow-sm"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-
-              {/* Language Switcher */}
-              <div className="flex items-center bg-zinc-200/50 p-0.5 h-10 rounded-xl shadow-inner select-none">
-                <button
-                  onClick={() => setLanguage("en")}
-                  className={`px-3 h-full rounded-lg text-[10px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${
-                    language === "en"
-                      ? "bg-white text-zinc-950 shadow-sm"
-                      : "text-zinc-400 hover:text-zinc-600"
-                  }`}
-                >
-                  EN
-                </button>
-                <button
-                  onClick={() => setLanguage("id")}
-                  className={`px-3 h-full rounded-lg text-[10px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${
-                    language === "id"
-                      ? "bg-white text-zinc-950 shadow-sm"
-                      : "text-zinc-400 hover:text-zinc-600"
-                  }`}
-                >
-                  ID
-                </button>
-              </div>
-            </div>
           </div>
-        </div>
 
         {/* ==================================================================
             RIGHT COLUMN: 70% Scrollable Content Area (Tighter spacing - FULL WIDTH ON MOBILE)
             ================================================================== */}
         <div
           id="specifications-scroll-container"
-          className="w-full lg:w-[68%] h-full overflow-y-auto px-6 py-8 flex flex-col scroll-smooth bg-white"
+          className={`w-full lg:w-[68%] h-full overflow-y-auto px-6 py-8 flex flex-col scroll-smooth ${contentBg} transition-all duration-300`}
         >
           {carriageGroups
             .sort((a, b) => a.order - b.order)

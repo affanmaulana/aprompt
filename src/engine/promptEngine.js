@@ -1,5 +1,5 @@
 // ============================================================================
-// Aprompt — Semantic Prompt Assembly Engine (v2)
+// Aprompt — Semantic Prompt Assembly Engine (v3 - Category-Aware Briefing Compiler)
 // Zero-latency CGI briefing Compiler with Implicit Foundation
 // ============================================================================
 
@@ -33,8 +33,9 @@ export function formatList(items) {
  * @param {Object} selections - User option selections (carriageId -> optionId/Array/Boolean)
  * @param {Object} customTexts - User custom text inputs (carriageId -> customText)
  * @param {Array} sentenceConfig - Configuration for compiling groups of parts into sentences
+ * @param {String} activeCategory - Active render category ('exterior' | 'interior' | 'cityscape')
  */
-export function assemblePrompt(schema, selections, customTexts, sentenceConfig) {
+export function assemblePrompt(schema, selections, customTexts, sentenceConfig, activeCategory = 'exterior') {
   if (!schema || !Array.isArray(schema)) return '';
 
   const localSelections = selections ? { ...selections } : {};
@@ -66,14 +67,30 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
     semanticPart: 'role'
   };
 
+  const taskText = activeCategory === 'interior'
+    ? 'Generate a stunning, accurate interior design architectural visualization rendering'
+    : activeCategory === 'cityscape'
+      ? 'Generate a stunning, accurate cityscape and urban design architectural visualization rendering'
+      : 'Generate a stunning, accurate architectural visualization rendering';
+
   resolvedValues['task'] = {
-    value: 'Generate a stunning, accurate architectural visualization rendering',
+    value: taskText,
     semanticPart: 'task'
   };
 
-  // Implicit Geometry Preservation (Always Yes)
+  // Implicit Geometry Preservation (Always Yes - Category Aware)
+  let geometryText;
+  if (activeCategory === 'interior') {
+    geometryText = 'with strict instruction to preserve the interior room structure, original wall layouts, ceiling height, and window placements, ensuring absolutely no architectural elements are altered, added, or removed, and explicitly preventing any furniture elements from distorting the spatial bounds of the architecture';
+  } else if (activeCategory === 'cityscape') {
+    geometryText = 'with strict instruction to preserve the existing urban morphology, skyline silhouette, block layouts, and street grids, ensuring absolutely no architectural or infrastructural elements are altered or distorted, and explicitly preventing any structures from being replaced by erratic landscape features';
+  } else {
+    // default: exterior
+    geometryText = 'with strict instruction to preserve the existing structural massing, original facade geometry, and original roofline, ensuring absolutely no architectural elements are altered, added, or removed, and explicitly preventing any structural elements from being replaced by surrounding landscaping, lush vegetation, or other environmental features';
+  }
+
   resolvedValues['geometry'] = {
-    value: 'with strict instruction to preserve the existing structural massing, original facade geometry, and original roofline, ensuring absolutely no architectural elements are altered, added, or removed, and explicitly preventing any structural elements from being replaced by surrounding landscaping, lush vegetation, or other environmental features',
+    value: geometryText,
     semanticPart: 'geometry'
   };
 
@@ -87,7 +104,7 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
     const hasCustomText = customText.trim().length > 0;
     if (!hasSelection && !hasCustomText) return;
 
-    // Generic Multi-select compilation (e.g. material, vehicle, composition, human_activity)
+    // Generic Multi-select compilation
     if (item.type === 'multi-select') {
       const selectedIds = Array.isArray(selection) ? selection : [];
       const parts = [];
@@ -112,6 +129,8 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
         // Keep legacy special materiality formatting for backward compatibility
         if (item.id === 'material') {
           resolvedTemplate = `featuring high-fidelity representation of ${listText} materiality`;
+        } else if (item.id === 'interior_material') {
+          resolvedTemplate = `featuring high-fidelity representation of ${listText} interior finishes`;
         }
 
         resolvedValues[item.id] = {
@@ -168,7 +187,13 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
 
   // 3.5. INJECT IMPLICIT COMPOSITION / FRAMING DEFAULT DIRECTIVE
   const userComposition = resolvedValues['composition']?.value || '';
-  const framingDirective = 'utilizing soft, out-of-focus framing elements (such as clean architectural silhouettes, subtle structural borders, or distant organic elements) positioned strictly in the extreme corners of the frame, ensuring the main facade remains 100% unobstructed, sharp, and clear';
+  let framingDirective;
+  
+  if (activeCategory === 'interior') {
+    framingDirective = 'utilizing clean, balanced framing lines (such as subtle structural walls or columns strictly at the edge of the frame) positioned strictly in the extreme corners of the frame, ensuring the main interior space remains 100% unobstructed, sharp, clear, and visually balanced';
+  } else {
+    framingDirective = 'utilizing soft, out-of-focus framing elements (such as clean architectural silhouettes, subtle structural borders, or distant organic elements) positioned strictly in the extreme corners of the frame, ensuring the main facade and architectural focal points remain 100% unobstructed, sharp, and clear';
+  }
   
   if (userComposition) {
     resolvedValues['composition'].value = `${userComposition}, while ${framingDirective}`;
@@ -180,12 +205,21 @@ export function assemblePrompt(schema, selections, customTexts, sentenceConfig) 
   }
 
   // 4. INJECT IMPLICIT MATERIAL QUALITY DEFAULT DIRECTIVE
-  // If the user selected materials, append glass reflection context to enrich details
-  if (resolvedValues['material']) {
-    resolvedValues['material'].value += ' with realistic glass reflection, refraction, and enhanced micro-surface texture resolution';
+  const activeMaterialKey = activeCategory === 'interior' ? 'interior_material' : 'material';
+  
+  if (resolvedValues[activeMaterialKey]) {
+    if (activeCategory === 'interior') {
+      resolvedValues[activeMaterialKey].value += ' with realistic wood grain patterns, high-fidelity stone veining, fabric weave textures, and physically accurate light scattering and reflection';
+    } else {
+      resolvedValues[activeMaterialKey].value += ' with realistic glass reflection, refraction, and enhanced micro-surface texture resolution';
+    }
   } else {
-    resolvedValues['material'] = {
-      value: 'featuring high-fidelity material representation, realistic glass reflection and refraction, and enhanced micro-surface texture resolution',
+    const defaultMaterialValue = activeCategory === 'interior'
+      ? 'featuring high-fidelity interior material representation, realistic wood grain patterns, stone veining, fabric weaves, and physically accurate light scattering'
+      : 'featuring high-fidelity material representation, realistic glass reflection and refraction, and enhanced micro-surface texture resolution';
+      
+    resolvedValues[activeMaterialKey] = {
+      value: defaultMaterialValue,
       semanticPart: 'material'
     };
   }

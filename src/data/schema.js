@@ -1,17 +1,26 @@
 // ============================================================================
-// Aprompt — Architectural Specification Schema (v2)
+// Aprompt — Architectural Specification Schema (v3 - Dynamic Category Architecture)
 // Minimalist Creative Parameters for Premium CGI Briefings
 // ============================================================================
+
+export const renderCategories = [
+  { id: 'exterior', title: 'Exterior', icon: 'Home', order: 1 },
+  { id: 'interior', title: 'Interior', icon: 'Layout', order: 2 },
+  { id: 'cityscape', title: 'Cityscape', icon: 'Building2', order: 3 }
+];
 
 export const promptSchema = [
   // ========================================================================
   // GROUP: essentials — Essentials
   // ========================================================================
+  
+  // --- EXTERIOR ESSENTIALS ---
   {
     id: 'subject',
     title: 'Subject Description',
     category: 'project',
     group: 'essentials',
+    categories: ['exterior'],
     order: 1,
     priority: 'required',
     template: '[VALUE]',
@@ -37,6 +46,7 @@ export const promptSchema = [
     title: 'Architectural Style',
     category: 'project',
     group: 'essentials',
+    categories: ['exterior'],
     order: 2,
     priority: 'required',
     template: 'in [VALUE] style',
@@ -62,6 +72,7 @@ export const promptSchema = [
     title: 'Materiality & Finishes',
     category: 'project',
     group: 'essentials',
+    categories: ['exterior'],
     order: 3,
     priority: 'required',
     template: 'featuring [VALUE]',
@@ -81,6 +92,141 @@ export const promptSchema = [
     ],
   },
 
+  // --- INTERIOR ESSENTIALS ---
+  {
+    id: 'interior_space',
+    title: 'Interior Space / Room',
+    category: 'project',
+    group: 'essentials',
+    categories: ['interior'],
+    order: 1,
+    priority: 'required',
+    template: 'of a [VALUE]',
+    enabled: true,
+    expandable: true,
+    semanticPart: 'subject',
+    allowDetailInput: true,
+    options: [
+      { id: 'living_room', label: 'Living Room', value: 'Living Room' },
+      { id: 'bedroom', label: 'Bedroom', value: 'Bedroom' },
+      { id: 'dining_room', label: 'Dining Room', value: 'Dining Room' },
+      { id: 'kitchen', label: 'Kitchen', value: 'Kitchen' },
+      { id: 'lobby', label: 'Lobby / Reception', value: 'Lobby' },
+      { id: 'cafe_restaurant', label: 'Cafe & Restaurant', value: 'Cafe & Restaurant' },
+      { id: 'office_workspace', label: 'Office Workspace', value: 'Office Workspace' },
+      { id: 'library', label: 'Library', value: 'Library' },
+      { id: 'bathroom', label: 'Bathroom', value: 'Bathroom' },
+    ],
+  },
+  {
+    id: 'interior_style',
+    title: 'Interior Design Style',
+    category: 'project',
+    group: 'essentials',
+    categories: ['interior'],
+    order: 2,
+    priority: 'required',
+    template: 'in [VALUE] design style',
+    enabled: true,
+    expandable: true,
+    semanticPart: 'subject',
+    allowDetailInput: true,
+    options: [
+      { id: 'minimalist', label: 'Minimalist', value: 'Minimalist' },
+      { id: 'scandinavian', label: 'Scandinavian', value: 'Scandinavian' },
+      { id: 'industrial_loft', label: 'Industrial Loft', value: 'Industrial Loft' },
+      { id: 'mid_century', label: 'Mid-Century Modern', value: 'Mid-Century Modern' },
+      { id: 'japandi', label: 'Japandi', value: 'Japandi' },
+      { id: 'art_deco', label: 'Art Deco', value: 'Art Deco' },
+      { id: 'modern_classical', label: 'Modern Classical', value: 'Modern Classical' },
+    ],
+  },
+  {
+    id: 'interior_material',
+    title: 'Interior Materiality & Finishes',
+    category: 'project',
+    group: 'essentials',
+    categories: ['interior'],
+    order: 3,
+    priority: 'required',
+    template: 'featuring [VALUE]',
+    enabled: true,
+    expandable: true,
+    semanticPart: 'material',
+    type: 'multi-select',
+    options: [
+      { id: 'micro_cement', label: 'Micro-cement', value: 'micro-cement floor' },
+      { id: 'oak_paneling', label: 'Oak Paneling', value: 'warm oak wood paneling' },
+      { id: 'polished_terrazzo', label: 'Polished Terrazzo', value: 'polished terrazzo' },
+      { id: 'exposed_brick', label: 'Exposed Brick', value: 'exposed brick walls' },
+      { id: 'marble_surfaces', label: 'Marble Surfaces', value: 'luxury marble surfaces' },
+      { id: 'brushed_brass', label: 'Brushed Brass', value: 'brushed brass finishes' },
+    ],
+  },
+
+  // --- CITYSCAPE ESSENTIALS ---
+  {
+    id: 'city_subject',
+    title: 'Cityscape Subject',
+    category: 'project',
+    group: 'essentials',
+    categories: ['cityscape'],
+    order: 1,
+    priority: 'required',
+    template: '[VALUE]',
+    enabled: true,
+    expandable: true,
+    semanticPart: 'subject',
+    allowDetailInput: true,
+    options: [
+      { id: 'metropolis_skyline', label: 'Metropolis Skyline', value: 'Metropolis Skyline' },
+      { id: 'historic_old_town', label: 'Historic Old Town', value: 'Historic Old Town' },
+      { id: 'coastal_promenade', label: 'Coastal Promenade', value: 'Coastal Promenade' },
+      { id: 'futuristic_smart_city', label: 'Futuristic Smart City', value: 'Futuristic Smart City' },
+      { id: 'venetian_canals', label: 'Venetian Canals', value: 'Venetian Canals' },
+    ],
+  },
+  {
+    id: 'city_style',
+    title: 'Urban Architecture Style',
+    category: 'project',
+    group: 'essentials',
+    categories: ['cityscape'],
+    order: 2,
+    priority: 'required',
+    template: 'featuring [VALUE] buildings',
+    enabled: true,
+    expandable: true,
+    semanticPart: 'subject',
+    allowDetailInput: true,
+    options: [
+      { id: 'modernist_skyscrapers', label: 'Modernist Skyscrapers', value: 'Modernist Skyscrapers' },
+      { id: 'classic_european_blocks', label: 'Classic European Blocks', value: 'Classic European Blocks' },
+      { id: 'biophilic_green_structures', label: 'Biophilic Green Structures', value: 'Biophilic Green Structures' },
+      { id: 'brutalist_megastructures', label: 'Brutalist Megastructures', value: 'Brutalist Megastructures' },
+      { id: 'cyberpunk_cyber_grid', label: 'Cyberpunk Cyber-Grid', value: 'Cyberpunk Cyber-Grid' },
+    ],
+  },
+  {
+    id: 'city_density',
+    title: 'Urban Density',
+    category: 'project',
+    group: 'essentials',
+    categories: ['cityscape'],
+    order: 3,
+    priority: 'required',
+    template: 'with [VALUE] density',
+    enabled: true,
+    expandable: true,
+    semanticPart: 'subject',
+    options: [
+      { id: 'high_rise_density', label: 'High-rise Density', value: 'High-rise Density' },
+      { id: 'low_rise_sprawl', label: 'Low-rise Sprawl', value: 'Low-rise Sprawl' },
+      { id: 'balanced_mixed_use', label: 'Balanced Mixed-use', value: 'Balanced Mixed-use' },
+      { id: 'mega_block_cluster', label: 'Mega-block Cluster', value: 'Mega-block Cluster' },
+    ],
+  },
+
   // ========================================================================
   // GROUP: camera — Camera & Framing
   // ========================================================================
@@ -89,6 +235,7 @@ export const promptSchema = [
     title: 'Camera Angle',
     category: 'camera',
     group: 'camera',
+    categories: ['exterior', 'interior', 'cityscape'],
     order: 10,
     priority: 'required',
     template: 'captured from [VALUE]',
@@ -110,6 +257,7 @@ export const promptSchema = [
     title: 'Composition Control',
     category: 'camera',
     group: 'camera',
+    categories: ['exterior', 'interior', 'cityscape'],
     order: 11,
     priority: 'optional',
     template: 'emphasizing [VALUE]',
@@ -136,6 +284,7 @@ export const promptSchema = [
     title: 'Lighting',
     category: 'environment',
     group: 'environment',
+    categories: ['exterior', 'interior', 'cityscape'],
     order: 20,
     priority: 'required',
     template: 'illuminated by [VALUE]',
@@ -161,6 +310,7 @@ export const promptSchema = [
     title: 'Weather Conditions',
     category: 'environment',
     group: 'environment',
+    categories: ['exterior', 'interior', 'cityscape'],
     order: 21,
     priority: 'recommended',
     template: 'under [VALUE] conditions',
@@ -186,6 +336,7 @@ export const promptSchema = [
     title: 'Atmosphere & Mood',
     category: 'environment',
     group: 'environment',
+    categories: ['exterior', 'interior', 'cityscape'],
     order: 22,
     priority: 'recommended',
     template: 'set in a [VALUE] atmosphere',
@@ -209,6 +360,7 @@ export const promptSchema = [
     title: 'Geographical Context',
     category: 'environment',
     group: 'environment',
+    categories: ['exterior', 'cityscape'],
     order: 23,
     priority: 'optional',
     template: 'located in [VALUE]',
@@ -234,6 +386,7 @@ export const promptSchema = [
     title: 'Landscape Strategy',
     category: 'environment',
     group: 'environment',
+    categories: ['exterior'],
     order: 24,
     priority: 'recommended',
     template: 'surrounded by [VALUE]',
@@ -255,6 +408,7 @@ export const promptSchema = [
     title: 'Street Context',
     category: 'environment',
     group: 'environment',
+    categories: ['exterior', 'cityscape'],
     order: 25,
     priority: 'optional',
     template: 'fronting a [VALUE]',
@@ -271,6 +425,54 @@ export const promptSchema = [
     ],
   },
 
+  // --- INTERIOR SPECIFIC ENVIRONMENT ---
+  {
+    id: 'interior_details',
+    title: 'Styling & Decor Details',
+    category: 'environment',
+    group: 'environment',
+    categories: ['interior'],
+    order: 24,
+    priority: 'recommended',
+    template: 'decorated with [VALUE]',
+    enabled: true,
+    expandable: true,
+    semanticPart: 'context',
+    type: 'multi-select',
+    options: [
+      { id: 'indoor_plants', label: 'Indoor Plants', value: 'lush indoor plants' },
+      { id: 'art_frames', label: 'Artwork Frames', value: 'abstract framed artwork' },
+      { id: 'linen_curtains', label: 'Linen Curtains', value: 'soft linen curtains' },
+      { id: 'coffee_table_books', label: 'Coffee Books', value: 'curated coffee table books' },
+      { id: 'ambient_lighting', label: 'Ambient LED', value: 'warm ambient LED strips' },
+      { id: 'custom', label: 'Custom Input...', value: 'custom' },
+    ],
+  },
+
+  // --- CITYSCAPE SPECIFIC ENVIRONMENT ---
+  {
+    id: 'city_elements',
+    title: 'Urban Infrastructure',
+    category: 'environment',
+    group: 'environment',
+    categories: ['cityscape'],
+    order: 24,
+    priority: 'recommended',
+    template: 'interwoven with [VALUE]',
+    enabled: true,
+    expandable: true,
+    semanticPart: 'context',
+    type: 'multi-select',
+    options: [
+      { id: 'elevated_monorail', label: 'Elevated Monorail', value: 'elevated monorail tracks' },
+      { id: 'pedestrian_plazas', label: 'Pedestrian Plazas', value: 'wide pedestrian plazas' },
+      { id: 'sky_bridges', label: 'Sky-Bridges', value: 'biophilic green sky-bridges' },
+      { id: 'bustling_canals', label: 'Bustling Canals', value: 'bustling canals' },
+      { id: 'green_pocket_parks', label: 'Pocket Parks', value: 'green pocket parks' },
+      { id: 'custom', label: 'Custom Input...', value: 'custom' },
+    ],
+  },
+
   // ========================================================================
   // GROUP: narrative — People & Storytelling
   // ========================================================================
@@ -279,6 +481,7 @@ export const promptSchema = [
     title: 'Vehicle Context',
     category: 'narrative',
     group: 'narrative',
+    categories: ['exterior', 'cityscape'],
     order: 30,
     priority: 'optional',
     template: 'with [VALUE] present',
@@ -296,11 +499,37 @@ export const promptSchema = [
       { id: 'custom', label: 'Custom Input...', value: 'custom' },
     ],
   },
+
+  // --- INTERIOR SPECIFIC NARRATIVE/FURNITURE ---
+  {
+    id: 'interior_furniture',
+    title: 'Furniture Layout',
+    category: 'narrative',
+    group: 'narrative',
+    categories: ['interior'],
+    order: 30,
+    priority: 'recommended',
+    template: 'furnished with [VALUE]',
+    enabled: true,
+    expandable: true,
+    semanticPart: 'narrative',
+    type: 'multi-select',
+    options: [
+      { id: 'minimalist_sofa', label: 'Modular Sofa', value: 'minimalist modular sofa' },
+      { id: 'designer_lounge_chair', label: 'Designer Chair', value: 'iconic designer lounge chair' },
+      { id: 'timber_credenza', label: 'Timber Credenza', value: 'bespoke timber credenza' },
+      { id: 'floating_shelves', label: 'Floating Shelves', value: 'custom floating shelves' },
+      { id: 'plush_area_rug', label: 'Plush Rug', value: 'plush natural area rug' },
+      { id: 'custom', label: 'Custom Input...', value: 'custom' },
+    ],
+  },
+
   {
     id: 'human_presence',
     title: 'Human Presence',
     category: 'narrative',
     group: 'narrative',
+    categories: ['exterior', 'interior', 'cityscape'],
     order: 31,
     priority: 'recommended',
     template: 'populated with [VALUE]',
@@ -320,6 +549,7 @@ export const promptSchema = [
     title: 'Human Activity',
     category: 'narrative',
     group: 'narrative',
+    categories: ['exterior', 'interior', 'cityscape'],
     order: 32,
     priority: 'optional',
     template: 'engaged in [VALUE]',
@@ -343,6 +573,7 @@ export const promptSchema = [
     title: 'Motion System',
     category: 'narrative',
     group: 'narrative',
+    categories: ['exterior', 'cityscape'],
     order: 33,
     priority: 'optional',
     template: 'with [VALUE]',
@@ -363,6 +594,7 @@ export const promptSchema = [
     title: 'Storytelling Context',
     category: 'narrative',
     group: 'narrative',
+    categories: ['exterior', 'interior', 'cityscape'],
     order: 34,
     priority: 'optional',
     template: 'evoking a mood of [VALUE]',
@@ -396,12 +628,14 @@ export const carriageGroups = [
 // Helpers
 // ============================================================================
 
-export function getCarriagesByGroup(groupId) {
-  return promptSchema.filter(c => c.group === groupId).sort((a, b) => a.order - b.order);
+export function getCarriagesByGroup(groupId, activeCategory = 'exterior') {
+  return promptSchema
+    .filter(c => c.group === groupId && (!c.categories || c.categories.includes(activeCategory)))
+    .sort((a, b) => a.order - b.order);
 }
 
 // ============================================================================
-// Semantic Prompt Assembly Configurations (Aprompt v2)
+// Semantic Prompt Assembly Configurations (Aprompt v3)
 // ============================================================================
 
 export const semanticOrder = [

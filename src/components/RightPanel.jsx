@@ -1,13 +1,22 @@
 import { useState } from "react";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Shuffle, RotateCcw } from "lucide-react";
 import { assemblePrompt } from "../engine/promptEngine";
 import { promptSentenceConfig } from "../data/schema";
 import { useLanguage } from "../context/LanguageContext";
+import { track } from "@vercel/analytics";
 
-export default function RightPanel({ schema, selections, customTexts, activeTab }) {
-  const { t } = useLanguage();
+export default function RightPanel({
+  schema,
+  selections,
+  customTexts,
+  activeTab,
+  activeCategory,
+  onReset,
+  onRandomize
+}) {
+  const { language, setLanguage, t } = useLanguage();
   const [copied, setCopied] = useState(false);
-  const generatedPrompt = assemblePrompt(schema, selections, customTexts, promptSentenceConfig);
+  const generatedPrompt = assemblePrompt(schema, selections, customTexts, promptSentenceConfig, activeCategory);
 
   const handleCopy = async () => {
     if (!generatedPrompt) return;
@@ -15,21 +24,36 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
     try {
       await navigator.clipboard.writeText(generatedPrompt);
       setCopied(true);
+
+      // Trigger Vercel Analytics event and flag tracking
+      track('Copy Prompt', {
+        category: activeCategory,
+        promptLength: generatedPrompt.length
+      }, {
+        flags: ['category-driven-v3']
+      });
+
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy text: ", err);
     }
   };
 
+  const rightPanelBg = activeCategory === 'interior'
+    ? 'bg-[#FBF9F5]'
+    : activeCategory === 'cityscape'
+      ? 'bg-[#F5F7FA]'
+      : 'bg-[#FCFDFB]';
+
   return (
     <div
-      className={`w-full lg:w-[55%] h-full bg-white flex flex-col relative transition-all duration-300 border-l border-zinc-200/50 ${activeTab === "preview" ? "flex" : "hidden lg:flex"
+      className={`w-full lg:w-[55%] h-full ${rightPanelBg} flex flex-col relative transition-all duration-300 border-l border-zinc-200/50 ${activeTab === "preview" ? "flex" : "hidden lg:flex"
         }`}
     >
       {/* ==================================================================
           MOBILE-ONLY HEADER BAR (Visual Coherence & Panel Branding)
           ================================================================== */}
-      <div className="lg:hidden flex items-center justify-between px-6 py-4 bg-stone-50 border-b border-zinc-200/60 select-none z-20">
+      <div className="lg:hidden flex items-center justify-between px-6 py-4 bg-transparent border-b border-zinc-200/60 select-none z-20">
         <div>
           <h1 className="text-xl font-display font-extrabold tracking-tighter text-zinc-900 leading-none">
             APROMPT
@@ -63,9 +87,56 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
             )}
           </div>
 
-          {/* Mobile Copy Button (In-flow below the prompt, completely safe from overlap/viewport bugs) */}
-          {generatedPrompt && (
-            <div className="lg:hidden mt-4">
+          {/* ==================================================================
+              MOBILE-ONLY UTILITIES & COPY ACTION (Clean bottom grouping)
+              ================================================================== */}
+          <div className="lg:hidden mt-8 flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              {/* Randomize */}
+              <button
+                onClick={onRandomize}
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-accent text-white font-sans font-bold text-xs active:scale-95 transition-all cursor-pointer shadow-sm shadow-accent/10"
+              >
+                <Shuffle className="w-3.5 h-3.5" />
+                {t('action.randomize', 'Randomize')}
+              </button>
+
+              {/* Reset */}
+              <button
+                onClick={onReset}
+                title={t('action.reset', 'Reset configuration')}
+                className="flex items-center justify-center p-3 rounded-xl border border-zinc-200 text-zinc-450 active:scale-95 transition-all cursor-pointer bg-white"
+              >
+                <RotateCcw className="w-4 h-4" />
+              </button>
+
+              {/* Language Switcher */}
+              <div className="flex items-center bg-zinc-200/50 p-0.5 h-10 rounded-xl shadow-inner select-none">
+                <button
+                  onClick={() => setLanguage("en")}
+                  className={`px-3 h-full rounded-lg text-[10px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${
+                    language === "en"
+                      ? "bg-white text-zinc-950 shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-650"
+                  }`}
+                >
+                  EN
+                </button>
+                <button
+                  onClick={() => setLanguage("id")}
+                  className={`px-3 h-full rounded-lg text-[10px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${
+                    language === "id"
+                      ? "bg-white text-zinc-950 shadow-sm"
+                      : "text-zinc-400 hover:text-zinc-650"
+                  }`}
+                >
+                  ID
+                </button>
+              </div>
+            </div>
+
+            {/* Copy button */}
+            {generatedPrompt && (
               <button
                 onClick={handleCopy}
                 className={`flex items-center justify-center w-full px-8 py-4 rounded-xl text-sm font-sans font-bold transition-all duration-300 cursor-pointer shadow-lg active:scale-95 ${
@@ -86,14 +157,68 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
                   </>
                 )}
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Sticky Bottom Bar containing the Copy Button (Desktop Only) */}
-      <div className="hidden lg:flex absolute bottom-0 left-0 right-0 p-6 lg:p-10 bg-gradient-to-t from-white via-white/95 to-white/0 justify-center z-20 pointer-events-none select-none">
-        <div className="max-w-4xl w-full mx-auto flex justify-end pointer-events-auto">
+      {/* ==================================================================
+          DESKTOP-ONLY STICKY COMMAND CENTER (Command bar opposite layout)
+          ================================================================== */}
+      <div className={`hidden lg:flex absolute bottom-0 left-0 right-0 p-6 lg:p-10 bg-gradient-to-t ${
+        activeCategory === 'interior'
+          ? 'from-[#FBF9F5] via-[#FBF9F5]/95'
+          : activeCategory === 'cityscape'
+            ? 'from-[#F5F7FA] via-[#F5F7FA]/95'
+            : 'from-[#FCFDFB] via-[#FCFDFB]/95'
+      } to-transparent justify-center z-20 pointer-events-none select-none`}>
+        <div className="max-w-4xl w-full mx-auto flex items-center justify-between pointer-events-auto">
+          {/* Bottom Left Toolbar/Utility Area */}
+          <div className="flex items-center gap-3">
+            {/* Randomize Button */}
+            <button
+              onClick={onRandomize}
+              className="flex items-center justify-center gap-2 py-3 px-5 rounded-xl bg-accent text-white font-sans font-bold text-xs hover:bg-accent/90 hover:shadow-md active:scale-95 transition-all duration-200 cursor-pointer shadow-sm select-none w-[130px]"
+            >
+              <Shuffle className="w-3.5 h-3.5" />
+              {t('action.randomize', 'Randomize')}
+            </button>
+
+            {/* Reset Button */}
+            <button
+              onClick={onReset}
+              title={t('action.reset', 'Reset configuration')}
+              className="flex items-center justify-center p-3 rounded-xl border border-zinc-200 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 hover:border-zinc-300 active:scale-95 transition-all duration-200 cursor-pointer shadow-sm bg-white"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+
+            {/* Language Switcher */}
+            <div className="flex items-center bg-zinc-200/50 p-0.5 h-10 rounded-xl shadow-inner select-none">
+              <button
+                onClick={() => setLanguage("en")}
+                className={`px-3.5 h-full rounded-lg text-[10px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${
+                  language === "en"
+                    ? "bg-white text-zinc-950 shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-600"
+                }`}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => setLanguage("id")}
+                className={`px-3.5 h-full rounded-lg text-[10px] font-sans font-extrabold tracking-wider transition-all duration-200 cursor-pointer ${
+                  language === "id"
+                    ? "bg-white text-zinc-950 shadow-sm"
+                    : "text-zinc-400 hover:text-zinc-600"
+                }`}
+              >
+                ID
+              </button>
+            </div>
+          </div>
+
+          {/* Copy Prompt Button */}
           <button
             onClick={handleCopy}
             disabled={!generatedPrompt}
@@ -101,7 +226,7 @@ export default function RightPanel({ schema, selections, customTexts, activeTab 
               ? "bg-zinc-100 text-zinc-400 cursor-not-allowed shadow-none"
               : copied
                 ? "bg-accent text-white shadow-xl shadow-accent/20 scale-[0.98]"
-                : "bg-black text-white hover:bg-zinc-800 hover:shadow-2xl hover:shadow-black/15 hover:-translate-y-0.5"
+                : "bg-black text-white hover:bg-zinc-800 hover:shadow-2xl hover:shadow-black/15 hover:-translate-y-0.5 active:scale-95"
               }`}
           >
             {copied ? (
